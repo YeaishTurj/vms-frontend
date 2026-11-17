@@ -1,0 +1,54 @@
+# ==============================================================================
+# Netlify Configuration — Vehicle Management System (VMS) Flutter Web
+# ==============================================================================
+
+[build]
+  # Output directory containing compiled Flutter Web assets
+  publish = "build/web"
+  # Automated build script installing Flutter SDK and compiling the release bundle
+  command = "bash ./netlify_build.sh"
+
+[build.environment]
+  FLUTTER_CHANNEL = "stable"
+
+# Single Page Application (SPA) Routing Fallback:
+# Serves index.html for all client-side routes with HTTP 200
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache optimizations: Prevent stale caches for entry point & service workers
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/flutter_bootstrap.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/flutter_service_worker.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Cache optimizations: Long-lived immutable cache for versioned assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/canvaskit/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
