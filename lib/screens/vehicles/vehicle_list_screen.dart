@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/responsive.dart';
 import '../../data/mock_vehicle_data.dart';
 import '../../models/vehicle.dart';
 import '../../routing/app_router.dart';
@@ -11,7 +12,8 @@ import '../../widgets/confirmation_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/status_badge.dart';
 
-/// Full-featured, responsive vehicle list screen with search, filters, pagination, and CRUD actions.
+/// Professional, enterprise-grade vehicle list screen with search, filters,
+/// highlighted vehicle numbers, polished status badges, pagination, and responsive layouts.
 class VehicleListScreen extends StatefulWidget {
   const VehicleListScreen({super.key});
 
@@ -43,10 +45,41 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
     });
   }
 
+  Future<void> _handleDelete(
+    BuildContext context,
+    MockVehicleData mockData,
+    Vehicle vehicle,
+  ) async {
+    final confirmed = await ConfirmationDialog.show(context, vehicle: vehicle);
+    if (confirmed && context.mounted) {
+      mockData.deleteVehicle(vehicle.id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.green,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text('Vehicle ${vehicle.vehicleNumber} deleted successfully.'),
+            ],
+          ),
+          backgroundColor: AppColors.charcoal,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mockData = MockVehicleData();
     final router = AppRouter();
+    final isMobile = Responsive.isMobile(context);
 
     return ListenableBuilder(
       listenable: mockData,
@@ -93,419 +126,59 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Screen Header: Title (Top Left) & Main Action (Top Right)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Vehicles', style: AppTextStyles.h1),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Manage, search and inspect all registered enterprise vehicles.',
-                        style: AppTextStyles.subtitle,
-                      ),
-                    ],
-                  ),
-                  AppButton(
-                    label: 'Register Vehicle',
-                    icon: Icons.add_box_rounded,
-                    variant: AppButtonVariant.primary,
-                    onPressed: () =>
-                        router.navigateTo(AppScreen.registerVehicle),
-                  ),
-                ],
-              ),
+              _buildScreenHeader(router, mockData.vehicles.length, isMobile),
               const SizedBox(height: 20),
 
-              // Filter & Search Toolbar Card
+              // Search and Filter Controls Toolbar
+              _buildFilterToolbar(hasActiveFilters, isMobile),
+              const SizedBox(height: 20),
+
+              // Clean White Table Container
               Container(
-                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(
                     AppConstants.cardBorderRadius,
                   ),
                   border: Border.all(color: AppColors.border, width: 1),
-                ),
-                child: Wrap(
-                  spacing: 16,
-                  runSpacing: 12,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    // Search Field
-                    SizedBox(
-                      width: 320,
-                      height: 40,
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (_) => setState(() => _currentPage = 1),
-                        style: AppTextStyles.bodyMedium,
-                        decoration: InputDecoration(
-                          hintText:
-                              'Search by Number, Company, Brand, Model...',
-                          hintStyle: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            size: 18,
-                            color: AppColors.textSecondary,
-                          ),
-                          suffixIcon: _searchController.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear, size: 16),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    setState(() => _currentPage = 1);
-                                  },
-                                )
-                              : null,
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x08000000),
+                      blurRadius: 4,
+                      offset: Offset(0, 1),
                     ),
-
-                    // Status Filter Dropdown
-                    Container(
-                      height: 40,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppColors.border, width: 1),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<VehicleStatus?>(
-                          value: _statusFilter,
-                          hint: const Text(
-                            'Status: All',
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                          items: [
-                            const DropdownMenuItem(
-                              value: null,
-                              child: Text(
-                                'Status: All',
-                                style: AppTextStyles.bodyMedium,
-                              ),
-                            ),
-                            ...VehicleStatus.values.map(
-                              (s) => DropdownMenuItem(
-                                value: s,
-                                child: Text(
-                                  'Status: ${s.label}',
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                              ),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            setState(() {
-                              _statusFilter = val;
-                              _currentPage = 1;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-
-                    // Type Filter Dropdown
-                    Container(
-                      height: 40,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppColors.border, width: 1),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String?>(
-                          value: _typeFilter,
-                          hint: const Text(
-                            'Type: All',
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                          items: [
-                            const DropdownMenuItem(
-                              value: null,
-                              child: Text(
-                                'Type: All',
-                                style: AppTextStyles.bodyMedium,
-                              ),
-                            ),
-                            ...Vehicle.commonTypes.map(
-                              (t) => DropdownMenuItem(
-                                value: t,
-                                child: Text(
-                                  'Type: $t',
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                              ),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            setState(() {
-                              _typeFilter = val;
-                              _currentPage = 1;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-
-                    // Clear Filters Action
-                    if (hasActiveFilters)
-                      TextButton.icon(
-                        icon: const Icon(
-                          Icons.filter_alt_off_outlined,
-                          size: 16,
-                          color: AppColors.red,
-                        ),
-                        label: const Text(
-                          'Clear Filters',
-                          style: TextStyle(
-                            color: AppColors.red,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        onPressed: _clearFilters,
-                      ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // Table Content Card
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(
-                    AppConstants.cardBorderRadius,
-                  ),
-                  border: Border.all(color: AppColors.border, width: 1),
-                ),
                 child: totalRecords == 0
-                    ? EmptyState(
-                        icon: Icons.search_off_rounded,
-                        title: hasActiveFilters
-                            ? 'No Matching Vehicles'
-                            : 'No Vehicles Found',
-                        description: hasActiveFilters
-                            ? 'No vehicle records matched your search query or filter options.'
-                            : 'There are currently no vehicles registered in the system.',
-                        actionLabel: hasActiveFilters
-                            ? 'Reset Filters'
-                            : 'Register Vehicle',
-                        onAction: hasActiveFilters
-                            ? _clearFilters
-                            : () =>
-                                  router.navigateTo(AppScreen.registerVehicle),
-                      )
+                    ? _buildEmptyState(hasActiveFilters, router)
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: DataTable(
-                              columns: const [
-                                DataColumn(label: Text('VEHICLE NUMBER')),
-                                DataColumn(label: Text('COMPANY')),
-                                DataColumn(label: Text('TYPE')),
-                                DataColumn(label: Text('BRAND')),
-                                DataColumn(label: Text('MODEL')),
-                                DataColumn(label: Text('STATUS')),
-                                DataColumn(label: Text('ACTIONS')),
-                              ],
-                              rows: paginatedList.map((vehicle) {
-                                return DataRow(
-                                  cells: [
-                                    DataCell(
-                                      Text(
-                                        vehicle.vehicleNumber,
-                                        style: AppTextStyles.tableCellBold
-                                            .copyWith(
-                                              color: AppColors.deepBlue,
-                                            ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text(
-                                        vehicle.company,
-                                        style: AppTextStyles.tableCell,
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text(
-                                        vehicle.type,
-                                        style: AppTextStyles.tableCell,
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text(
-                                        vehicle.brand,
-                                        style: AppTextStyles.tableCell,
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text(
-                                        vehicle.model,
-                                        style: AppTextStyles.tableCell,
-                                      ),
-                                    ),
-                                    DataCell(
-                                      StatusBadge(status: vehicle.status),
-                                    ),
-                                    DataCell(
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          // Edit Action Button
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.edit_outlined,
-                                              size: 18,
-                                              color: AppColors.corporateBlue,
-                                            ),
-                                            tooltip: 'Edit Vehicle',
-                                            onPressed: () => router
-                                                .navigateToEditVehicle(vehicle),
-                                          ),
-                                          // Delete Action Button
-                                          IconButton(
-                                            icon: const Icon(
-                                              Icons.delete_outline_rounded,
-                                              size: 18,
-                                              color: AppColors.red,
-                                            ),
-                                            tooltip: 'Delete Vehicle',
-                                            onPressed: () async {
-                                              final confirmed =
-                                                  await ConfirmationDialog.show(
-                                                    context,
-                                                    vehicle: vehicle,
-                                                  );
-                                              if (confirmed) {
-                                                mockData.deleteVehicle(
-                                                  vehicle.id,
-                                                );
-                                                if (context.mounted) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        'Vehicle ${vehicle.vehicleNumber} deleted successfully.',
-                                                      ),
-                                                      backgroundColor:
-                                                          AppColors.charcoal,
-                                                      duration: const Duration(
-                                                        seconds: 3,
-                                                      ),
-                                                    ),
-                                                  );
-                                                }
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
+                          // Table layout (desktop/tablet) or Card list (mobile)
+                          if (isMobile)
+                            _buildMobileCardList(
+                              context,
+                              paginatedList,
+                              mockData,
+                              router,
+                            )
+                          else
+                            _buildDesktopTable(
+                              context,
+                              paginatedList,
+                              mockData,
+                              router,
                             ),
-                          ),
-                          const Divider(height: 1),
+
+                          const Divider(color: AppColors.border, height: 1),
 
                           // Pagination Footer
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Showing ${startIndex + 1} to $endIndex of $totalRecords vehicles',
-                                  style: AppTextStyles.bodySmall,
-                                ),
-                                Row(
-                                  children: [
-                                    // Rows Per Page Dropdown
-                                    Row(
-                                      children: [
-                                        const Text(
-                                          'Rows: ',
-                                          style: AppTextStyles.caption,
-                                        ),
-                                        DropdownButtonHideUnderline(
-                                          child: DropdownButton<int>(
-                                            value: _rowsPerPage,
-                                            items: const [
-                                              DropdownMenuItem(
-                                                value: 5,
-                                                child: Text('5'),
-                                              ),
-                                              DropdownMenuItem(
-                                                value: 8,
-                                                child: Text('8'),
-                                              ),
-                                              DropdownMenuItem(
-                                                value: 12,
-                                                child: Text('12'),
-                                              ),
-                                            ],
-                                            onChanged: (val) {
-                                              if (val != null) {
-                                                setState(() {
-                                                  _rowsPerPage = val;
-                                                  _currentPage = 1;
-                                                });
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 16),
-
-                                    // Previous Page Button
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.chevron_left_rounded,
-                                      ),
-                                      tooltip: 'Previous Page',
-                                      onPressed: _currentPage > 1
-                                          ? () => setState(() => _currentPage--)
-                                          : null,
-                                    ),
-                                    Text(
-                                      'Page $_currentPage of $totalPages',
-                                      style: AppTextStyles.bodySmall.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    // Next Page Button
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.chevron_right_rounded,
-                                      ),
-                                      tooltip: 'Next Page',
-                                      onPressed: _currentPage < totalPages
-                                          ? () => setState(() => _currentPage++)
-                                          : null,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                          _buildPaginationFooter(
+                            startIndex: startIndex,
+                            endIndex: endIndex,
+                            totalRecords: totalRecords,
+                            totalPages: totalPages,
+                            isMobile: isMobile,
                           ),
                         ],
                       ),
@@ -514,6 +187,734 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildScreenHeader(
+    AppRouter router,
+    int totalVehicles,
+    bool isMobile,
+  ) {
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('Vehicles', style: AppTextStyles.h1),
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.corporateBlue.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$totalVehicles Total',
+                  style: const TextStyle(
+                    color: AppColors.deepBlue,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Manage, search and inspect all registered fleet vehicles.',
+            style: AppTextStyles.subtitle,
+          ),
+          const SizedBox(height: 12),
+          AppButton(
+            label: 'Register Vehicle',
+            icon: Icons.add_rounded,
+            variant: AppButtonVariant.primary,
+            isFullWidth: true,
+            onPressed: () => router.navigateTo(AppScreen.registerVehicle),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text('Vehicles', style: AppTextStyles.h1),
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.corporateBlue.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$totalVehicles Total',
+                    style: const TextStyle(
+                      color: AppColors.deepBlue,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Manage, search and inspect all registered fleet vehicles.',
+              style: AppTextStyles.subtitle,
+            ),
+          ],
+        ),
+        AppButton(
+          label: 'Register Vehicle',
+          icon: Icons.add_rounded,
+          variant: AppButtonVariant.primary,
+          onPressed: () => router.navigateTo(AppScreen.registerVehicle),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterToolbar(bool hasActiveFilters, bool isMobile) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+        border: Border.all(color: AppColors.border, width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x06000000),
+            blurRadius: 4,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Wrap(
+        spacing: 14,
+        runSpacing: 12,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          // 1. Search Field
+          SizedBox(
+            width: isMobile ? double.infinity : 320,
+            height: 40,
+            child: TextField(
+              controller: _searchController,
+              onChanged: (_) => setState(() => _currentPage = 1),
+              style: AppTextStyles.bodyMedium,
+              decoration: InputDecoration(
+                hintText: 'Search by Number, Company, Brand...',
+                hintStyle: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textMuted,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 16),
+                        tooltip: 'Clear search',
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _currentPage = 1);
+                        },
+                      )
+                    : null,
+                isDense: true,
+                filled: true,
+                fillColor: const Color(0xFFF8FAFC),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+            ),
+          ),
+
+          // 2. Status Filter Dropdown
+          Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: AppColors.border, width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.filter_list_rounded,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 8),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<VehicleStatus?>(
+                    value: _statusFilter,
+                    hint: const Text(
+                      'All Statuses',
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text(
+                          'All Statuses',
+                          style: AppTextStyles.bodyMedium,
+                        ),
+                      ),
+                      ...VehicleStatus.values.map(
+                        (s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(s.label, style: AppTextStyles.bodyMedium),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        _statusFilter = val;
+                        _currentPage = 1;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 3. Type Filter Dropdown
+          Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: AppColors.border, width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.directions_car_outlined,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 8),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<String?>(
+                    value: _typeFilter,
+                    hint: const Text(
+                      'All Types',
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text(
+                          'All Types',
+                          style: AppTextStyles.bodyMedium,
+                        ),
+                      ),
+                      ...Vehicle.commonTypes.map(
+                        (t) => DropdownMenuItem(
+                          value: t,
+                          child: Text(t, style: AppTextStyles.bodyMedium),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        _typeFilter = val;
+                        _currentPage = 1;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 4. Clear Filters Action
+          if (hasActiveFilters)
+            TextButton.icon(
+              icon: const Icon(
+                Icons.restart_alt_rounded,
+                size: 16,
+                color: AppColors.red,
+              ),
+              label: const Text(
+                'Clear Filters',
+                style: TextStyle(
+                  color: AppColors.red,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              onPressed: _clearFilters,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopTable(
+    BuildContext context,
+    List<Vehicle> vehicles,
+    MockVehicleData mockData,
+    AppRouter router,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: constraints.maxWidth < 920 ? 920 : constraints.maxWidth,
+            ),
+            child: DataTable(
+              headingRowColor: WidgetStateProperty.all(const Color(0xFFF8FAFC)),
+              dataRowColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.hovered)) {
+                  return const Color(0xFFF8FAFC);
+                }
+                return AppColors.white;
+              }),
+              headingRowHeight: 48,
+              dataRowMinHeight: 56,
+              dataRowMaxHeight: 60,
+              horizontalMargin: 20,
+              columnSpacing: 24,
+              dividerThickness: 1,
+              columns: const [
+                DataColumn(
+                  label: Text(
+                    'VEHICLE NUMBER',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.deepBlue,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'COMPANY',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.deepBlue,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'TYPE',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.deepBlue,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'BRAND',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.deepBlue,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'MODEL',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.deepBlue,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'STATUS',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.deepBlue,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'ACTIONS',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.deepBlue,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
+              rows: vehicles.map((vehicle) {
+                return DataRow(
+                  cells: [
+                    // 1. Vehicle Number (Highlighted Badge)
+                    DataCell(_buildVehicleNumberBadge(vehicle.vehicleNumber)),
+
+                    // 2. Company
+                    DataCell(
+                      Text(
+                        vehicle.company,
+                        style: AppTextStyles.tableCellBold.copyWith(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+
+                    // 3. Type
+                    DataCell(
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: const Color(0xFFE2E8F0),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          vehicle.type,
+                          style: const TextStyle(
+                            color: AppColors.charcoal,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // 4. Brand
+                    DataCell(
+                      Text(
+                        vehicle.brand,
+                        style: AppTextStyles.tableCell.copyWith(fontSize: 13),
+                      ),
+                    ),
+
+                    // 5. Model
+                    DataCell(
+                      Text(
+                        vehicle.model,
+                        style: AppTextStyles.tableCell.copyWith(fontSize: 13),
+                      ),
+                    ),
+
+                    // 6. Status Badge
+                    DataCell(StatusBadge(status: vehicle.status)),
+
+                    // 7. Actions (Edit & Delete)
+                    DataCell(
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildActionButton(
+                            icon: Icons.edit_outlined,
+                            tooltip: 'Edit Vehicle',
+                            color: AppColors.corporateBlue,
+                            bgColor: const Color(0xFFEBF3FA),
+                            borderColor: const Color(0xFFD0E2F3),
+                            onTap: () => router.navigateToEditVehicle(vehicle),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildActionButton(
+                            icon: Icons.delete_outline_rounded,
+                            tooltip: 'Delete Vehicle',
+                            color: AppColors.red,
+                            bgColor: const Color(0xFFFEE2E2),
+                            borderColor: const Color(0xFFFECACA),
+                            onTap: () =>
+                                _handleDelete(context, mockData, vehicle),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMobileCardList(
+    BuildContext context,
+    List<Vehicle> vehicles,
+    MockVehicleData mockData,
+    AppRouter router,
+  ) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      itemCount: vehicles.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final vehicle = vehicles[index];
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.border, width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildVehicleNumberBadge(vehicle.vehicleNumber),
+                  StatusBadge(status: vehicle.status),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: _buildDetailItem('Company', vehicle.company)),
+                  Expanded(child: _buildDetailItem('Type', vehicle.type)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(child: _buildDetailItem('Brand', vehicle.brand)),
+                  Expanded(child: _buildDetailItem('Model', vehicle.model)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Divider(color: AppColors.borderLight, height: 1),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _buildActionButton(
+                    icon: Icons.edit_outlined,
+                    tooltip: 'Edit Vehicle',
+                    color: AppColors.corporateBlue,
+                    bgColor: const Color(0xFFEBF3FA),
+                    borderColor: const Color(0xFFD0E2F3),
+                    onTap: () => router.navigateToEditVehicle(vehicle),
+                  ),
+                  const SizedBox(width: 8),
+                  _buildActionButton(
+                    icon: Icons.delete_outline_rounded,
+                    tooltip: 'Delete Vehicle',
+                    color: AppColors.red,
+                    bgColor: const Color(0xFFFEE2E2),
+                    borderColor: const Color(0xFFFECACA),
+                    onTap: () => _handleDelete(context, mockData, vehicle),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles.caption),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.w500,
+            fontSize: 13,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVehicleNumberBadge(String vehicleNumber) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F4F8),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFFD0DCE8), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.directions_car_rounded,
+            size: 14,
+            color: AppColors.deepBlue,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            vehicleNumber,
+            style: const TextStyle(
+              color: AppColors.deepBlue,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String tooltip,
+    required Color color,
+    required Color bgColor,
+    required Color borderColor,
+    required VoidCallback onTap,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            width: 32,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: borderColor, width: 1),
+            ),
+            child: Icon(icon, size: 16, color: color),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(bool hasActiveFilters, AppRouter router) {
+    return EmptyState(
+      icon: Icons.search_off_rounded,
+      title: hasActiveFilters ? 'No Matching Vehicles' : 'No Vehicles Found',
+      description: hasActiveFilters
+          ? 'No fleet records matched your current search criteria. Try modifying your search or clearing active filters.'
+          : 'There are currently no vehicles registered in the fleet system.',
+      actionLabel: hasActiveFilters ? 'Reset Filters' : 'Register Vehicle',
+      onAction: hasActiveFilters
+          ? _clearFilters
+          : () => router.navigateTo(AppScreen.registerVehicle),
+    );
+  }
+
+  Widget _buildPaginationFooter({
+    required int startIndex,
+    required int endIndex,
+    required int totalRecords,
+    required int totalPages,
+    required bool isMobile,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Showing ${startIndex + 1} to $endIndex of $totalRecords vehicles',
+            style: AppTextStyles.bodySmall,
+          ),
+          Row(
+            children: [
+              // Rows Per Page Selector
+              if (!isMobile) ...[
+                const Text('Rows: ', style: AppTextStyles.caption),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<int>(
+                    value: _rowsPerPage,
+                    items: const [
+                      DropdownMenuItem(value: 5, child: Text('5')),
+                      DropdownMenuItem(value: 8, child: Text('8')),
+                      DropdownMenuItem(value: 12, child: Text('12')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() {
+                          _rowsPerPage = val;
+                          _currentPage = 1;
+                        });
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+              ],
+
+              // Previous Page
+              IconButton(
+                icon: const Icon(Icons.chevron_left_rounded, size: 20),
+                tooltip: 'Previous Page',
+                onPressed: _currentPage > 1
+                    ? () => setState(() => _currentPage--)
+                    : null,
+              ),
+              Text(
+                'Page $_currentPage of $totalPages',
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              // Next Page
+              IconButton(
+                icon: const Icon(Icons.chevron_right_rounded, size: 20),
+                tooltip: 'Next Page',
+                onPressed: _currentPage < totalPages
+                    ? () => setState(() => _currentPage++)
+                    : null,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
