@@ -19,5 +19,5 @@ class AppConstants {
 
   // Demo Credentials
   static const String demoUsername = 'admin';
-  static const String demoPassword = 'password123';
+  static const String demoPassword = 'admin123';
 }

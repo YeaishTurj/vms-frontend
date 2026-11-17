@@ -193,7 +193,7 @@ class AppSidebar extends StatelessWidget {
                       textColor: const Color(0xFFEF9A9A),
                       onTap: () {
                         if (isDrawer) Navigator.of(context).pop();
-                        router.setAuthenticated(false);
+                        router.logout();
                       },
                     ),
                   ],

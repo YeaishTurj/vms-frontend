@@ -72,5 +72,34 @@ void main() {
       expect(router.isAuthenticated, isTrue);
       expect(router.currentScreen, AppScreen.dashboard);
     });
+
+    test('Unauthenticated navigation attempts are guarded and redirected to login', () {
+      router.setAuthenticated(false);
+      expect(router.isAuthenticated, isFalse);
+
+      router.navigateTo(AppScreen.vehicles);
+      expect(router.currentScreen, AppScreen.login);
+
+      const sampleVehicle = Vehicle(
+        id: 'vms-edit-test',
+        vehicleNumber: 'DM-EDIT-01',
+        company: 'Transit Co',
+        type: 'Sedan',
+        brand: 'Honda',
+        model: 'Civic',
+        status: VehicleStatus.active,
+      );
+      router.navigateToEditVehicle(sampleVehicle);
+      expect(router.currentScreen, AppScreen.login);
+    });
+
+    test('logout clears authentication and resets to login screen', () async {
+      expect(router.isAuthenticated, isTrue);
+
+      await router.logout();
+
+      expect(router.isAuthenticated, isFalse);
+      expect(router.currentScreen, AppScreen.login);
+    });
   });
 }

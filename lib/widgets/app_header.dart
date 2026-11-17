@@ -4,6 +4,7 @@ import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
 import '../core/utils/responsive.dart';
+import '../data/services/auth_service.dart';
 import '../routing/app_router.dart';
 
 /// Top application header for the Vehicle Management System.
@@ -153,38 +154,52 @@ class AppHeader extends StatelessWidget {
               const SizedBox(width: 16),
 
               // User Profile & Avatar
-              Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppColors.deepBlue,
-                    child: Text(
-                      'AD',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ListenableBuilder(
+                listenable: AuthService.instance,
+                builder: (context, _) {
+                  final session = AuthService.instance.currentSession;
+                  final username = session?.username ?? 'Admin';
+                  final initials = username.isNotEmpty
+                      ? (username.length >= 2
+                            ? username.substring(0, 2).toUpperCase()
+                            : username.toUpperCase())
+                      : 'AD';
+                  final roleDisplay = session?.displayRole ?? 'Fleet Manager';
+
+                  return Row(
                     children: [
-                      Text(
-                        'Admin User',
-                        style: AppTextStyles.tableCellBold.copyWith(
-                          fontSize: 13,
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor: AppColors.deepBlue,
+                        child: Text(
+                          initials,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.white,
+                          ),
                         ),
                       ),
-                      Text(
-                        'Fleet Manager',
-                        style: AppTextStyles.caption.copyWith(fontSize: 11),
+                      const SizedBox(width: 10),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            username,
+                            style: AppTextStyles.tableCellBold.copyWith(
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            roleDisplay,
+                            style: AppTextStyles.caption.copyWith(fontSize: 11),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ],
+                  );
+                },
               ),
             ],
           ),

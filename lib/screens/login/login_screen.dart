@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../data/services/api_exception.dart';
+import '../../data/services/auth_service.dart';
 import '../../routing/app_router.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
@@ -35,8 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     setState(() => _errorMessage = null);
+    AuthService.instance.clearSessionMessage();
 
     if (!_formKey.currentState!.validate()) {
       return;
@@ -44,23 +47,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-    // Mock login verification with simulated delay
-    Future.delayed(const Duration(milliseconds: 400), () {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    try {
+      await AuthService.instance.login(username, password);
       if (!mounted) return;
-
-      final username = _usernameController.text.trim();
-      final password = _passwordController.text.trim();
-
-      if (username.isNotEmpty && password.isNotEmpty) {
-        setState(() => _isLoading = false);
-        AppRouter().setAuthenticated(true);
-      } else {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = 'Please provide valid login credentials.';
-        });
-      }
-    });
+      setState(() => _isLoading = false);
+      AppRouter().navigateTo(AppScreen.dashboard);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = e.message;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage =
+            'Unable to connect to the authentication server. Please verify your connection.';
+      });
+    }
   }
 
   @override
@@ -137,6 +145,40 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 28),
+
+                  // Optional Session Notification (e.g. Session Expired)
+                  if (AuthService.instance.sessionMessage != null && _errorMessage == null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF8E1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: const Color(0xFFFFB300).withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.timer_outlined,
+                            size: 16,
+                            color: Color(0xFFE65100),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              AuthService.instance.sessionMessage!,
+                              style: AppTextStyles.caption.copyWith(
+                                color: const Color(0xFFE65100),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Optional Error Notice
                   if (_errorMessage != null) ...[

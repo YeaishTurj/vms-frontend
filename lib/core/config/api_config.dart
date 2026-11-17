@@ -13,8 +13,37 @@ class ApiConfig {
   /// Default timeout for HTTP requests.
   static const Duration timeout = Duration(seconds: 15);
 
+  /// Whether the current configured API base URL enforces HTTPS.
+  static bool get isHttps => baseUrl.toLowerCase().startsWith('https://');
+
+  /// Whether the target base URL points to a local development loopback host.
+  static bool get isLocalhost {
+    try {
+      final uri = Uri.parse(baseUrl);
+      return uri.host == 'localhost' ||
+          uri.host == '127.0.0.1' ||
+          uri.host == '0.0.0.0';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Whether the configuration is secure for the current environment.
+  /// Development on loopback may use HTTP; production non-loopback environments require HTTPS.
+  static bool get isSecureForEnvironment => isLocalhost || isHttps;
+
   /// Vehicles resource base path.
   static const String vehiclesPath = '/vehicles';
+
+  /// Authentication base endpoints matching Spring Boot AuthController contract.
+  static const String loginPath = '/auth/login';
+  static const String mePath = '/auth/me';
+
+  /// Builds the URI for user login authentication.
+  static Uri loginUri() => Uri.parse('$baseUrl$loginPath');
+
+  /// Builds the URI for fetching current authenticated user profile.
+  static Uri meUri() => Uri.parse('$baseUrl$mePath');
 
   /// Builds a URI for paginated vehicle queries.
   static Uri vehiclesUri({int page = 0, int size = 10, String? sort}) {
