@@ -1,42 +1,26 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
+import '../models/vehicle.dart';
 import 'app_button.dart';
 
-/// Modal dialog for destructive or critical actions (e.g., deleting vehicles).
+/// Modal dialog for confirming vehicle deletion.
 class ConfirmationDialog extends StatelessWidget {
-  final String title;
-  final String message;
-  final String confirmLabel;
-  final String cancelLabel;
-  final bool isDestructive;
+  final Vehicle vehicle;
 
   const ConfirmationDialog({
     super.key,
-    required this.title,
-    required this.message,
-    this.confirmLabel = 'Confirm',
-    this.cancelLabel = 'Cancel',
-    this.isDestructive = false,
+    required this.vehicle,
   });
 
   static Future<bool> show(
     BuildContext context, {
-    required String title,
-    required String message,
-    String confirmLabel = 'Confirm',
-    String cancelLabel = 'Cancel',
-    bool isDestructive = false,
+    required Vehicle vehicle,
   }) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => ConfirmationDialog(
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        isDestructive: isDestructive,
-      ),
+      barrierDismissible: false,
+      builder: (context) => ConfirmationDialog(vehicle: vehicle),
     );
     return result ?? false;
   }
@@ -45,56 +29,98 @@ class ConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.white,
       surfaceTintColor: Colors.transparent,
       child: Container(
-        width: 420,
+        width: 440,
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Title Header with Warning Icon
             Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isDestructive ? AppColors.statusInactiveBg : AppColors.primaryContainer,
+                  decoration: const BoxDecoration(
+                    color: AppColors.redBg,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    isDestructive ? Icons.warning_amber_rounded : Icons.info_outline,
-                    color: isDestructive ? AppColors.statusInactive : AppColors.primary,
-                    size: 20,
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    color: AppColors.red,
+                    size: 22,
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
+                const Expanded(
                   child: Text(
-                    title,
-                    style: AppTextStyles.h3,
+                    'Delete Vehicle',
+                    style: AppTextStyles.h2,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Text(
-              message,
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+
+            // Message Body
+            const Text(
+              'Are you sure you want to permanently delete this vehicle from the management system? This action cannot be undone.',
+              style: AppTextStyles.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+
+            // Vehicle Details Card
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.softGray,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: AppColors.border, width: 1),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Text('Vehicle No: ', style: AppTextStyles.caption),
+                      Text(vehicle.vehicleNumber, style: AppTextStyles.tableCellBold),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Text('Vehicle: ', style: AppTextStyles.caption),
+                      Text('${vehicle.brand} ${vehicle.model} (${vehicle.type})', style: AppTextStyles.bodySmall),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Text('Company: ', style: AppTextStyles.caption),
+                      Text(vehicle.company, style: AppTextStyles.bodySmall),
+                    ],
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
+
+            // Action Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 AppButton(
-                  label: cancelLabel,
-                  variant: AppButtonVariant.outlined,
+                  label: 'Cancel',
+                  variant: AppButtonVariant.secondary,
                   onPressed: () => Navigator.of(context).pop(false),
                 ),
                 const SizedBox(width: 12),
                 AppButton(
-                  label: confirmLabel,
-                  variant: isDestructive ? AppButtonVariant.danger : AppButtonVariant.primary,
+                  label: 'Delete Vehicle',
+                  icon: Icons.delete_outline_rounded,
+                  variant: AppButtonVariant.danger,
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
               ],

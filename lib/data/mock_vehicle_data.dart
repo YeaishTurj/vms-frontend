@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import '../models/vehicle.dart';
 
-/// In-memory repository providing static and mutable mock fleet data.
+/// In-memory reactive repository managing the VMS fleet data.
 class MockVehicleData extends ChangeNotifier {
-  // Singleton pattern for simple shared in-memory state
+  // Singleton pattern for shared local state across screens
   static final MockVehicleData _instance = MockVehicleData._internal();
   factory MockVehicleData() => _instance;
 
@@ -15,130 +15,104 @@ class MockVehicleData extends ChangeNotifier {
 
   List<Vehicle> get vehicles => List.unmodifiable(_vehicles);
 
+  // Initial seed data with at least 8 realistic corporate vehicles
   static final List<Vehicle> _seedVehicles = [
-    Vehicle(
-      id: 'VMS-101',
-      vin: '1HGCR2F83HA129482',
-      licensePlate: 'DHK-METRO-GA-1122',
-      make: 'Toyota',
+    const Vehicle(
+      id: 'vms-001',
+      vehicleNumber: 'DM-GA-11-2041',
+      company: 'Apex Logistics',
+      type: 'Sedan',
+      brand: 'Toyota',
       model: 'Camry',
-      year: 2023,
-      type: VehicleType.sedan,
-      fuelType: FuelType.hybrid,
-      mileage: 18450,
       status: VehicleStatus.active,
-      assignedDriver: 'Rafiqul Islam',
-      lastServiceDate: DateTime(2026, 9, 14),
-      notes: 'Executive corporate transport vehicle. Pristine condition.',
     ),
-    Vehicle(
-      id: 'VMS-102',
-      vin: '1FTFW1E84PKB21094',
-      licensePlate: 'DHK-METRO-TA-4455',
-      make: 'Ford',
+    const Vehicle(
+      id: 'vms-002',
+      vehicleNumber: 'DM-TA-14-8821',
+      company: 'Metro Express',
+      type: 'Truck',
+      brand: 'Ford',
       model: 'F-150',
-      year: 2022,
-      type: VehicleType.truck,
-      fuelType: FuelType.diesel,
-      mileage: 48920,
-      status: VehicleStatus.inService,
-      assignedDriver: 'Kamal Hossain',
-      lastServiceDate: DateTime(2026, 8, 20),
-      notes: 'Assigned to logistics and heavy depot dispatch route.',
+      status: VehicleStatus.underMaintenance,
     ),
-    Vehicle(
-      id: 'VMS-103',
-      vin: '5YJ3E1EB8NF192847',
-      licensePlate: 'DHK-METRO-BHA-8899',
-      make: 'Tesla',
-      model: 'Model 3',
-      year: 2024,
-      type: VehicleType.sedan,
-      fuelType: FuelType.electric,
-      mileage: 12100,
+    const Vehicle(
+      id: 'vms-003',
+      vehicleNumber: 'DM-BHA-22-9011',
+      company: 'Global Transit',
+      type: 'Van',
+      brand: 'Mercedes-Benz',
+      model: 'Sprinter',
       status: VehicleStatus.active,
-      assignedDriver: 'Tanvir Ahmed',
-      lastServiceDate: DateTime(2026, 10, 05),
-      notes: 'Zero emissions fleet pool car. Home base fast-charger equipped.',
     ),
-    Vehicle(
-      id: 'VMS-104',
-      vin: 'WD3PE8CD8NP394851',
-      licensePlate: 'DHK-METRO-CHA-3321',
-      make: 'Mercedes-Benz',
-      model: 'Sprinter 2500',
-      year: 2021,
-      type: VehicleType.van,
-      fuelType: FuelType.diesel,
-      mileage: 87400,
-      status: VehicleStatus.maintenance,
-      assignedDriver: 'Unassigned',
-      lastServiceDate: DateTime(2026, 11, 01),
-      notes: 'Brake pad replacement and transmission inspection in progress.',
-    ),
-    Vehicle(
-      id: 'VMS-105',
-      vin: '1GNSKBKC9MR109283',
-      licensePlate: 'DHK-METRO-GHA-7766',
-      make: 'Chevrolet',
-      model: 'Tahoe Premier',
-      year: 2023,
-      type: VehicleType.suv,
-      fuelType: FuelType.petrol,
-      mileage: 31200,
+    const Vehicle(
+      id: 'vms-004',
+      vehicleNumber: 'DM-CHA-55-1234',
+      company: 'Apex Logistics',
+      type: 'SUV',
+      brand: 'Toyota',
+      model: 'Prado',
       status: VehicleStatus.active,
-      assignedDriver: 'Mahmudur Rahman',
-      lastServiceDate: DateTime(2026, 7, 19),
-      notes: 'VIP protocol fleet. All periodic maintenance checks current.',
     ),
-    Vehicle(
-      id: 'VMS-106',
-      vin: '2C4RC1CG5NR678912',
-      licensePlate: 'DHK-METRO-NA-9988',
-      make: 'Chrysler',
-      model: 'Pacifica Hybrid',
-      year: 2022,
-      type: VehicleType.van,
-      fuelType: FuelType.hybrid,
-      mileage: 41500,
-      status: VehicleStatus.inService,
-      assignedDriver: 'Shamsul Alam',
-      lastServiceDate: DateTime(2026, 9, 28),
-      notes: 'Employee shuttle daily route from central office to technology park.',
+    const Vehicle(
+      id: 'vms-005',
+      vehicleNumber: 'DM-GHA-77-6543',
+      company: 'Prime Fleet',
+      type: 'Bus',
+      brand: 'Volvo',
+      model: '9700',
+      status: VehicleStatus.underMaintenance,
     ),
-    Vehicle(
-      id: 'VMS-107',
-      vin: '4UZAA2AC5NCBL1283',
-      licensePlate: 'DHK-METRO-JA-0011',
-      make: 'Volvo',
-      model: '9700 Coach',
-      year: 2020,
-      type: VehicleType.bus,
-      fuelType: FuelType.diesel,
-      mileage: 134200,
-      status: VehicleStatus.active,
-      assignedDriver: 'Abdul Gafur',
-      lastServiceDate: DateTime(2026, 10, 12),
-      notes: 'Long-haul inter-city corporate conference transport.',
-    ),
-    Vehicle(
-      id: 'VMS-108',
-      vin: 'JM3KFBCM9P1827364',
-      licensePlate: 'DHK-METRO-KHA-6655',
-      make: 'Mazda',
-      model: 'CX-5',
-      year: 2021,
-      type: VehicleType.suv,
-      fuelType: FuelType.petrol,
-      mileage: 62000,
+    const Vehicle(
+      id: 'vms-006',
+      vehicleNumber: 'DM-NA-33-8765',
+      company: 'Metro Express',
+      type: 'Sedan',
+      brand: 'Honda',
+      model: 'Civic',
       status: VehicleStatus.inactive,
-      assignedDriver: 'Unassigned',
-      lastServiceDate: DateTime(2026, 5, 11),
-      notes: 'Decommissioned pending auction disposal.',
+    ),
+    const Vehicle(
+      id: 'vms-007',
+      vehicleNumber: 'DM-JA-44-3322',
+      company: 'Eco Courier',
+      type: 'Van',
+      brand: 'Ford',
+      model: 'Transit',
+      status: VehicleStatus.active,
+    ),
+    const Vehicle(
+      id: 'vms-008',
+      vehicleNumber: 'DM-KHA-19-4455',
+      company: 'Global Transit',
+      type: 'SUV',
+      brand: 'Hyundai',
+      model: 'Santa Fe',
+      status: VehicleStatus.active,
+    ),
+    const Vehicle(
+      id: 'vms-009',
+      vehicleNumber: 'DM-DA-88-7711',
+      company: 'City Dispatch',
+      type: 'Truck',
+      brand: 'Isuzu',
+      model: 'NPR',
+      status: VehicleStatus.inactive,
+    ),
+    const Vehicle(
+      id: 'vms-010',
+      vehicleNumber: 'DM-RA-99-0012',
+      company: 'Prime Fleet',
+      type: 'Sedan',
+      brand: 'Tesla',
+      model: 'Model 3',
+      status: VehicleStatus.active,
     ),
   ];
 
-  // Repository Methods
+  // ---------------------------------------------------------------------------
+  // CRUD Operations
+  // ---------------------------------------------------------------------------
+
   Vehicle? findById(String id) {
     try {
       return _vehicles.firstWhere((v) => v.id == id);
@@ -165,21 +139,30 @@ class MockVehicleData extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Dashboard Aggregates
-  int get totalVehicles => _vehicles.length;
+  /// Validates duplicate Vehicle Number across all records.
+  /// If [excludeId] is provided (during edit), that vehicle's own ID is ignored.
+  bool isVehicleNumberDuplicate(String vehicleNumber, {String? excludeId}) {
+    final normalized = vehicleNumber.trim().toLowerCase();
+    return _vehicles.any((v) {
+      if (excludeId != null && v.id == excludeId) {
+        return false;
+      }
+      return v.vehicleNumber.trim().toLowerCase() == normalized;
+    });
+  }
 
-  int get countActive =>
+  // ---------------------------------------------------------------------------
+  // Dashboard Aggregates
+  // ---------------------------------------------------------------------------
+
+  int get totalCount => _vehicles.length;
+
+  int get activeCount =>
       _vehicles.where((v) => v.status == VehicleStatus.active).length;
 
-  int get countInService =>
-      _vehicles.where((v) => v.status == VehicleStatus.inService).length;
-
-  int get countMaintenance =>
-      _vehicles.where((v) => v.status == VehicleStatus.maintenance).length;
-
-  int get countInactive =>
+  int get inactiveCount =>
       _vehicles.where((v) => v.status == VehicleStatus.inactive).length;
 
-  int get totalFleetMileage =>
-      _vehicles.fold<int>(0, (sum, v) => sum + v.mileage);
+  int get maintenanceCount =>
+      _vehicles.where((v) => v.status == VehicleStatus.underMaintenance).length;
 }

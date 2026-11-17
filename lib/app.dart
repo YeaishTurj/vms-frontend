@@ -35,8 +35,8 @@ class MainShell extends StatelessWidget {
     return ListenableBuilder(
       listenable: router,
       builder: (context, _) {
-        // Full screen login without application shell
-        if (router.currentScreen == AppScreen.login) {
+        // When unauthenticated or on login screen, show isolated login card
+        if (!router.isAuthenticated || router.currentScreen == AppScreen.login) {
           return const LoginScreen();
         }
 
@@ -72,10 +72,13 @@ class MainShell extends StatelessWidget {
         return const DashboardScreen();
       case AppScreen.vehicles:
         return const VehicleListScreen();
-      case AppScreen.vehicleCreate:
+      case AppScreen.registerVehicle:
         return const VehicleFormScreen();
-      case AppScreen.vehicleEdit:
-        return VehicleFormScreen(initialVehicle: router.selectedVehicleForEdit);
+      case AppScreen.editVehicle:
+        return VehicleFormScreen(
+          key: ValueKey(router.selectedVehicleForEdit?.id ?? 'edit'),
+          initialVehicle: router.selectedVehicleForEdit,
+        );
     }
   }
 }

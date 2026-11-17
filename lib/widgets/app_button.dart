@@ -3,13 +3,12 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
 
 enum AppButtonVariant {
-  primary,
-  secondary,
-  outlined,
-  danger,
+  primary,   // Corporate Blue (#5B9BD5)
+  secondary, // White with border
+  danger,    // Red (#D32F2F)
 }
 
-/// Standardized corporate button component.
+/// Standardized VMS button component.
 class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -36,35 +35,32 @@ class AppButton extends StatelessWidget {
 
     switch (variant) {
       case AppButtonVariant.primary:
-        bg = AppColors.primary;
-        fg = AppColors.textOnPrimary;
+        bg = AppColors.corporateBlue;
+        fg = AppColors.white;
         border = BorderSide.none;
         break;
       case AppButtonVariant.secondary:
-        bg = AppColors.primaryContainer;
-        fg = AppColors.onPrimaryContainer;
-        border = BorderSide.none;
-        break;
-      case AppButtonVariant.outlined:
-        bg = AppColors.surface;
-        fg = AppColors.textPrimary;
+        bg = AppColors.white;
+        fg = AppColors.charcoal;
         border = const BorderSide(color: AppColors.border, width: 1);
         break;
       case AppButtonVariant.danger:
-        bg = AppColors.statusInactive;
-        fg = AppColors.textOnPrimary;
+        bg = AppColors.red;
+        fg = AppColors.white;
         border = BorderSide.none;
         break;
     }
 
-    Widget content = Row(
+    final isButtonDisabled = onPressed == null || isLoading;
+
+    final child = Row(
       mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (isLoading) ...[
           SizedBox(
-            width: 16,
-            height: 16,
+            width: 14,
+            height: 14,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(fg),
@@ -85,16 +81,16 @@ class AppButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: isLoading ? null : onPressed,
+        onTap: isButtonDisabled ? null : onPressed,
         borderRadius: BorderRadius.circular(6),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: onPressed == null ? AppColors.border : bg,
+            color: isButtonDisabled ? AppColors.border : bg,
             borderRadius: BorderRadius.circular(6),
             border: border != BorderSide.none ? Border.fromBorderSide(border!) : null,
           ),
-          child: content,
+          child: child,
         ),
       ),
     );

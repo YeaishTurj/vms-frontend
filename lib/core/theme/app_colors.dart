@@ -1,61 +1,35 @@
 import 'package:flutter/material.dart';
 
-/// Corporate Blue & White Design System Color Palette for VMS.
+/// Exact corporate color palette specified for the Vehicle Management System (VMS).
 class AppColors {
   AppColors._();
 
-  // Primary Corporate Blue Palette
-  static const Color primary = Color(0xFF1E3A8A); // Corporate Navy Blue
-  static const Color primaryLight = Color(0xFF3B82F6); // Active Blue
-  static const Color primaryDark = Color(0xFF172554); // Deep Navy
-  static const Color primaryContainer = Color(0xFFDBEAFE); // Soft Blue Tint
-  static const Color onPrimaryContainer = Color(0xFF1E40AF);
+  // Primary Palette
+  static const Color deepBlue = Color(0xFF1F4E79);      // Navigation & important headings
+  static const Color corporateBlue = Color(0xFF5B9BD5); // Primary buttons & selected elements
+  static const Color softGray = Color(0xFFF5F7FA);       // Application background
+  static const Color white = Color(0xFFFFFFFF);          // Cards, tables & form containers
+  static const Color charcoal = Color(0xFF1F2937);       // Primary typography & dark accents
 
-  // Secondary & Neutral Slates
-  static const Color secondary = Color(0xFF475569); // Slate Grey
-  static const Color secondaryLight = Color(0xFF94A3B8);
-  static const Color secondaryContainer = Color(0xFFF1F5F9);
+  // Status & Semantic Colors
+  static const Color green = Color(0xFF2E7D32);          // Active & success status
+  static const Color greenBg = Color(0xFFE8F5E9);        // Light green container
+  static const Color red = Color(0xFFD32F2F);            // Inactive, delete & error messages
+  static const Color redBg = Color(0xFFFFEBEE);          // Light red container
+  static const Color amber = Color(0xFFE65100);          // Under Maintenance status
+  static const Color amberBg = Color(0xFFFFF3E0);        // Light amber container
 
-  // Background & Surface
-  static const Color background = Color(0xFFF8FAFC); // Clean Canvas Background
-  static const Color surface = Color(0xFFFFFFFF); // Pure White Cards & Panels
-  static const Color surfaceVariant = Color(0xFFF1F5F9); // Light Gray Surface
-  static const Color sidebarBackground = Color(0xFF0F172A); // Dark Executive Sidebar
-  static const Color sidebarSelected = Color(0xFF1E293B); // Sidebar Active Item
-  static const Color sidebarText = Color(0xFF94A3B8); // Sidebar Muted Text
-  static const Color sidebarTextActive = Color(0xFFFFFFFF); // Sidebar Active Text
+  // Neutral Tones
+  static const Color border = Color(0xFFE5E7EB);         // Card & table border
+  static const Color borderLight = Color(0xFFF3F4F6);    // Subtle dividers
+  static const Color textPrimary = Color(0xFF1F2937);    // Charcoal
+  static const Color textSecondary = Color(0xFF4B5563);  // Muted gray text
+  static const Color textMuted = Color(0xFF9CA3AF);      // Placeholder & disabled text
 
-  // Borders & Dividers
-  static const Color border = Color(0xFFE2E8F0); // Subtle Border
-  static const Color borderSubtle = Color(0xFFF1F5F9);
-  static const Color divider = Color(0xFFE2E8F0);
-
-  // Typography Colors
-  static const Color textPrimary = Color(0xFF0F172A); // Charcoal Slate 900
-  static const Color textSecondary = Color(0xFF475569); // Slate 600
-  static const Color textMuted = Color(0xFF94A3B8); // Slate 400
-  static const Color textOnPrimary = Color(0xFFFFFFFF);
-
-  // Status & Indicator Colors
-  // Active / Ready
-  static const Color statusActive = Color(0xFF16A34A);
-  static const Color statusActiveBg = Color(0xFFDCFCE7);
-
-  // In Service / On Route
-  static const Color statusInService = Color(0xFF2563EB);
-  static const Color statusInServiceBg = Color(0xFFDBEAFE);
-
-  // Maintenance Required
-  static const Color statusMaintenance = Color(0xFFD97706);
-  static const Color statusMaintenanceBg = Color(0xFFFEF3C7);
-
-  // Inactive / Retired
-  static const Color statusInactive = Color(0xFFDC2626);
-  static const Color statusInactiveBg = Color(0xFFFEE2E2);
-
-  // Form Field Accents
-  static const Color inputFill = Color(0xFFFFFFFF);
-  static const Color inputBorder = Color(0xFFCBD5E1);
-  static const Color inputFocusBorder = Color(0xFF2563EB);
-  static const Color inputErrorBorder = Color(0xFFEF4444);
+  // Navigation Colors
+  static const Color sidebarBackground = Color(0xFF1F4E79); // Deep blue sidebar
+  static const Color sidebarActiveItem = Color(0xFF5B9BD5); // Corporate blue active
+  static const Color sidebarHover = Color(0xFF285E8E);
+  static const Color sidebarText = Color(0xFFD1D5DB);
+  static const Color sidebarTextActive = Color(0xFFFFFFFF);
 }

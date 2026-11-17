@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
 
-/// Reusable Form Field Component with consistent label, hint, and error states.
+/// Standardized Form Input Field for VMS forms.
 class AppTextField extends StatelessWidget {
   final String label;
   final String? hint;
@@ -13,8 +13,9 @@ class AppTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final IconData? prefixIcon;
-  final Widget? suffix;
+  final Widget? suffixIcon;
   final int maxLines;
+  final bool isRequired;
   final bool enabled;
 
   const AppTextField({
@@ -28,8 +29,9 @@ class AppTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
     this.prefixIcon,
-    this.suffix,
+    this.suffixIcon,
     this.maxLines = 1,
+    this.isRequired = false,
     this.enabled = true,
   });
 
@@ -38,12 +40,25 @@ class AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTextStyles.subtitle.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: AppTextStyles.fieldLabel,
+            ),
+            if (isRequired) ...[
+              const SizedBox(width: 4),
+              const Text(
+                '*',
+                style: TextStyle(
+                  color: AppColors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 6),
         TextFormField(
@@ -61,7 +76,7 @@ class AppTextField extends StatelessWidget {
             prefixIcon: prefixIcon != null
                 ? Icon(prefixIcon, size: 18, color: AppColors.textSecondary)
                 : null,
-            suffixIcon: suffix,
+            suffixIcon: suffixIcon,
           ),
         ),
       ],

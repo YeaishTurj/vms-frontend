@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_text_styles.dart';
 import '../models/vehicle.dart';
 
-/// Reusable status badge with corporate indicator dot and color tokens.
+/// Clean pill badge indicating vehicle operational status.
 class StatusBadge extends StatelessWidget {
   final VehicleStatus status;
   final bool showDot;
@@ -44,6 +44,7 @@ class StatusBadge extends StatelessWidget {
             status.label,
             style: AppTextStyles.badge.copyWith(
               color: status.color,
+              fontSize: 12,
             ),
           ),
         ],

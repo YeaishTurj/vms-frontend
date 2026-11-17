@@ -3,12 +3,11 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/mock_vehicle_data.dart';
-import '../../models/vehicle.dart';
 import '../../routing/app_router.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/status_badge.dart';
 
-/// Executive Overview Fleet Dashboard.
+/// Clean corporate Dashboard Screen displaying fleet summary cards and quick overview.
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
@@ -20,59 +19,51 @@ class DashboardScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: mockData,
       builder: (context, _) {
-        final totalVehicles = mockData.totalVehicles;
-        final activeVehicles = mockData.countActive;
-        final inServiceVehicles = mockData.countInService;
-        final maintenanceVehicles = mockData.countMaintenance;
-        final totalMileage = mockData.totalFleetMileage;
+        final totalCount = mockData.totalCount;
+        final activeCount = mockData.activeCount;
+        final inactiveCount = mockData.inactiveCount;
+        final maintenanceCount = mockData.maintenanceCount;
         final recentVehicles = mockData.vehicles.take(5).toList();
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.defaultPadding),
+          padding: const EdgeInsets.all(AppConstants.contentPadding),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Page Action Header
+              // Screen Header: Title (Top Left) & Main Action (Top Right)
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Fleet Operations Command',
-                        style: AppTextStyles.h2,
+                        'Dashboard',
+                        style: AppTextStyles.h1,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Real-time operational status, maintenance readiness, and vehicle assignments.',
-                        style: AppTextStyles.subtitle.copyWith(fontSize: 13),
+                        'Overview of enterprise fleet status and operational readiness.',
+                        style: AppTextStyles.subtitle,
                       ),
                     ],
                   ),
-                  const Spacer(),
                   AppButton(
                     label: 'Register Vehicle',
-                    icon: Icons.add,
+                    icon: Icons.add_box_rounded,
                     variant: AppButtonVariant.primary,
-                    onPressed: () => router.navigateTo(AppScreen.vehicleCreate),
-                  ),
-                  const SizedBox(width: 12),
-                  AppButton(
-                    label: 'View Inventory',
-                    icon: Icons.list_alt_rounded,
-                    variant: AppButtonVariant.outlined,
-                    onPressed: () => router.navigateTo(AppScreen.vehicles),
+                    onPressed: () => router.navigateTo(AppScreen.registerVehicle),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
 
-              // KPI Metric Cards Grid
+              // Summary Cards Grid (Total, Active, Inactive, Under Maintenance)
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final isWide = constraints.maxWidth >= 900;
-                  final cardWidth = isWide
+                  final isDesktop = constraints.maxWidth >= 900;
+                  final cardWidth = isDesktop
                       ? (constraints.maxWidth - (3 * 16)) / 4
                       : (constraints.maxWidth - 16) / 2;
 
@@ -80,157 +71,112 @@ class DashboardScreen extends StatelessWidget {
                     spacing: 16,
                     runSpacing: 16,
                     children: [
-                      _MetricCard(
+                      _SummaryCard(
                         width: cardWidth,
-                        title: 'Total Fleet',
-                        value: '$totalVehicles',
-                        unit: 'Vehicles registered',
-                        icon: Icons.directions_car_filled,
-                        iconColor: AppColors.primary,
-                        iconBg: AppColors.primaryContainer,
+                        title: 'Total Vehicles',
+                        count: totalCount,
+                        icon: Icons.directions_car_filled_rounded,
+                        color: AppColors.deepBlue,
+                        bgColor: const Color(0xFFE9F1F8),
                       ),
-                      _MetricCard(
+                      _SummaryCard(
                         width: cardWidth,
-                        title: 'Ready / Active',
-                        value: '$activeVehicles',
-                        unit: 'Available for dispatch',
+                        title: 'Active Vehicles',
+                        count: activeCount,
                         icon: Icons.check_circle_outline_rounded,
-                        iconColor: AppColors.statusActive,
-                        iconBg: AppColors.statusActiveBg,
+                        color: AppColors.green,
+                        bgColor: AppColors.greenBg,
                       ),
-                      _MetricCard(
+                      _SummaryCard(
                         width: cardWidth,
-                        title: 'In Service',
-                        value: '$inServiceVehicles',
-                        unit: 'Currently on route',
-                        icon: Icons.near_me_outlined,
-                        iconColor: AppColors.statusInService,
-                        iconBg: AppColors.statusInServiceBg,
+                        title: 'Inactive Vehicles',
+                        count: inactiveCount,
+                        icon: Icons.cancel_outlined,
+                        color: AppColors.red,
+                        bgColor: AppColors.redBg,
                       ),
-                      _MetricCard(
+                      _SummaryCard(
                         width: cardWidth,
-                        title: 'In Maintenance',
-                        value: '$maintenanceVehicles',
-                        unit: 'Service bay inspection',
+                        title: 'Vehicles Under Maintenance',
+                        count: maintenanceCount,
                         icon: Icons.build_circle_outlined,
-                        iconColor: AppColors.statusMaintenance,
-                        iconBg: AppColors.statusMaintenanceBg,
+                        color: AppColors.amber,
+                        bgColor: AppColors.amberBg,
                       ),
                     ],
                   );
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
-              // Summary Banner: Total Mileage
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
-                  border: Border.all(color: AppColors.border, width: 1),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceVariant,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.speed_rounded, color: AppColors.primary, size: 22),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Aggregate Fleet Odometer', style: AppTextStyles.subtitle),
-                        Text(
-                          '${_formatNumber(totalMileage)} km recorded across all operational units',
-                          style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryContainer,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        '100% Telemetry Active',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Recent Fleet Units Section
+              // Recent Fleet Activity Section
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
                   border: Border.all(color: AppColors.border, width: 1),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Card Header
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Recently Updated Fleet Units', style: AppTextStyles.h3),
-                          const Spacer(),
+                          const Text(
+                            'Recent Fleet Vehicles',
+                            style: AppTextStyles.h3,
+                          ),
                           TextButton.icon(
-                            icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                            label: const Text('View All'),
+                            icon: const Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.corporateBlue),
+                            label: const Text(
+                              'View All Vehicles',
+                              style: TextStyle(color: AppColors.corporateBlue, fontWeight: FontWeight.w600),
+                            ),
                             onPressed: () => router.navigateTo(AppScreen.vehicles),
                           ),
                         ],
                       ),
                     ),
                     const Divider(height: 1),
+
+                    // Table View
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
                         columns: const [
-                          DataColumn(label: Text('VEHICLE / ID')),
-                          DataColumn(label: Text('PLATE NUMBER')),
+                          DataColumn(label: Text('VEHICLE NUMBER')),
+                          DataColumn(label: Text('COMPANY')),
                           DataColumn(label: Text('TYPE')),
+                          DataColumn(label: Text('BRAND & MODEL')),
                           DataColumn(label: Text('STATUS')),
-                          DataColumn(label: Text('ODOMETER')),
-                          DataColumn(label: Text('ASSIGNED DRIVER')),
-                          DataColumn(label: Text('ACTION')),
+                          DataColumn(label: Text('ACTIONS')),
                         ],
                         rows: recentVehicles.map((vehicle) {
                           return DataRow(
                             cells: [
                               DataCell(
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(vehicle.displayName, style: AppTextStyles.tableCellBold),
-                                    Text(vehicle.id, style: AppTextStyles.caption),
-                                  ],
+                                Text(
+                                  vehicle.vehicleNumber,
+                                  style: AppTextStyles.tableCellBold.copyWith(color: AppColors.deepBlue),
                                 ),
                               ),
-                              DataCell(Text(vehicle.licensePlate, style: AppTextStyles.tableCell)),
-                              DataCell(Text(vehicle.type.label, style: AppTextStyles.tableCell)),
+                              DataCell(Text(vehicle.company, style: AppTextStyles.tableCell)),
+                              DataCell(Text(vehicle.type, style: AppTextStyles.tableCell)),
+                              DataCell(Text('${vehicle.brand} ${vehicle.model}', style: AppTextStyles.tableCell)),
                               DataCell(StatusBadge(status: vehicle.status)),
-                              DataCell(Text('${_formatNumber(vehicle.mileage)} km', style: AppTextStyles.tableCell)),
-                              DataCell(Text(vehicle.assignedDriver, style: AppTextStyles.tableCell)),
                               DataCell(
-                                IconButton(
-                                  icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
-                                  tooltip: 'Edit Vehicle',
-                                  onPressed: () => router.navigateToEditVehicle(vehicle),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.corporateBlue),
+                                      tooltip: 'Edit Vehicle',
+                                      onPressed: () => router.navigateToEditVehicle(vehicle),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -247,32 +193,23 @@ class DashboardScreen extends StatelessWidget {
       },
     );
   }
-
-  static String _formatNumber(int number) {
-    return number.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    );
-  }
 }
 
-class _MetricCard extends StatelessWidget {
+class _SummaryCard extends StatelessWidget {
   final double width;
   final String title;
-  final String value;
-  final String unit;
+  final int count;
   final IconData icon;
-  final Color iconColor;
-  final Color iconBg;
+  final Color color;
+  final Color bgColor;
 
-  const _MetricCard({
+  const _SummaryCard({
     required this.width,
     required this.title,
-    required this.value,
-    required this.unit,
+    required this.count,
     required this.icon,
-    required this.iconColor,
-    required this.iconBg,
+    required this.color,
+    required this.bgColor,
   });
 
   @override
@@ -281,7 +218,7 @@ class _MetricCard extends StatelessWidget {
       width: width,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
         border: Border.all(color: AppColors.border, width: 1),
       ),
@@ -289,38 +226,37 @@ class _MetricCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title.toUpperCase(),
-                style: AppTextStyles.caption.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                  color: AppColors.textSecondary,
+              Expanded(
+                child: Text(
+                  title.toUpperCase(),
+                  style: AppTextStyles.caption.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                    color: AppColors.textSecondary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const Spacer(),
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(8),
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                child: Icon(icon, size: 18, color: iconColor),
+                child: Icon(icon, size: 18, color: color),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            value,
+            '$count',
             style: AppTextStyles.h1.copyWith(
               fontSize: 32,
               fontWeight: FontWeight.w700,
+              color: color,
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            unit,
-            style: AppTextStyles.bodySmall,
           ),
         ],
       ),

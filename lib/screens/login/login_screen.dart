@@ -6,7 +6,7 @@ import '../../routing/app_router.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 
-/// Clean corporate login screen.
+/// Professional VMS Login Screen with mock authentication.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -15,23 +15,45 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController(text: 'admin@vms-fleet.internal');
-  final _passwordController = TextEditingController(text: '••••••••');
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController(text: AppConstants.demoUsername);
+  final _passwordController = TextEditingController(text: AppConstants.demoPassword);
+
+  bool _obscurePassword = true;
   bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   void _handleLogin() {
+    setState(() => _errorMessage = null);
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     setState(() => _isLoading = true);
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (mounted) {
+
+    // Mock login verification with simulated delay
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (!mounted) return;
+
+      final username = _usernameController.text.trim();
+      final password = _passwordController.text.trim();
+
+      if (username.isNotEmpty && password.isNotEmpty) {
         setState(() => _isLoading = false);
-        AppRouter().navigateTo(AppScreen.dashboard);
+        AppRouter().setAuthenticated(true);
+      } else {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Please provide valid login credentials.';
+        });
       }
     });
   }
@@ -39,115 +61,186 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.softGray,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Container(
-            width: 440,
+            width: 420,
             padding: const EdgeInsets.all(36),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
               border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 16,
-                  offset: const Offset(0, 8),
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Brand Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.directions_car_filled_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      AppConstants.appShortName,
-                      style: AppTextStyles.h1.copyWith(
-                        fontSize: 24,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: Text(
-                    'Corporate Fleet Portal Authentication',
-                    style: AppTextStyles.subtitle.copyWith(fontSize: 13),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Form Fields
-                AppTextField(
-                  label: 'Work Email Address',
-                  controller: _emailController,
-                  prefixIcon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 18),
-                AppTextField(
-                  label: 'Security Password',
-                  controller: _passwordController,
-                  prefixIcon: Icons.lock_outline_rounded,
-                  obscureText: true,
-                ),
-                const SizedBox(height: 24),
-
-                // Sign In Button
-                AppButton(
-                  label: 'Access Fleet Workspace',
-                  icon: Icons.login_rounded,
-                  variant: AppButtonVariant.primary,
-                  isLoading: _isLoading,
-                  fullWidth: true,
-                  onPressed: _handleLogin,
-                ),
-                const SizedBox(height: 20),
-
-                // Security Notice
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryContainer.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // VMS Branding
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.shield_outlined, size: 16, color: AppColors.primary),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Authorized internal personnel only. All access is logged.',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.primary,
-                            fontSize: 11,
-                          ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.deepBlue,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.directions_car_filled_rounded,
+                          color: AppColors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        AppConstants.appShortName,
+                        style: AppTextStyles.h1.copyWith(
+                          fontSize: 24,
+                          color: AppColors.deepBlue,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Center(
+                    child: Text(
+                      AppConstants.appName,
+                      style: AppTextStyles.subtitle.copyWith(fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Optional Error Notice
+                  if (_errorMessage != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.redBg,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppColors.red.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline_rounded, size: 16, color: AppColors.red),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: AppTextStyles.caption.copyWith(color: AppColors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Username Field
+                  AppTextField(
+                    label: 'Username',
+                    hint: 'Enter your username',
+                    controller: _usernameController,
+                    prefixIcon: Icons.person_outline_rounded,
+                    isRequired: true,
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'Username is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 18),
+
+                  // Password Field with Visibility Toggle
+                  AppTextField(
+                    label: 'Password',
+                    hint: 'Enter your password',
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    prefixIcon: Icons.lock_outline_rounded,
+                    isRequired: true,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        size: 18,
+                        color: AppColors.textSecondary,
+                      ),
+                      tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                      onPressed: () {
+                        setState(() => _obscurePassword = !_obscurePassword);
+                      },
+                    ),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'Password is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Login Button
+                  AppButton(
+                    label: 'Sign In to Dashboard',
+                    icon: Icons.login_rounded,
+                    variant: AppButtonVariant.primary,
+                    isLoading: _isLoading,
+                    fullWidth: true,
+                    onPressed: _handleLogin,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Documented Sample Credentials Card
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.softGray,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: AppColors.border, width: 1),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.info_outline_rounded, size: 14, color: AppColors.deepBlue),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Sample Credentials (Mock Login)',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.deepBlue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Username: ${AppConstants.demoUsername}', style: AppTextStyles.caption),
+                            Text('Password: ${AppConstants.demoPassword}', style: AppTextStyles.caption),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

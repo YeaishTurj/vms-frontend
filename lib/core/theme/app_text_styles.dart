@@ -1,54 +1,53 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// Standard Typography Styles for the Vehicle Management System.
+/// Clean typography styles for the Vehicle Management System.
 class AppTextStyles {
   AppTextStyles._();
 
-  // Headings
+  // Headings in Deep Blue
   static const TextStyle h1 = TextStyle(
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-    letterSpacing: -0.5,
+    color: AppColors.deepBlue,
+    letterSpacing: -0.4,
     height: 1.25,
   );
 
   static const TextStyle h2 = TextStyle(
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
-    letterSpacing: -0.25,
+    color: AppColors.deepBlue,
+    letterSpacing: -0.2,
     height: 1.3,
   );
 
   static const TextStyle h3 = TextStyle(
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
+    color: AppColors.charcoal,
     height: 1.35,
   );
 
-  // Subtitles & Section Headers
+  // Subtitles & Labels
   static const TextStyle subtitle = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
     height: 1.4,
   );
 
-  // Body Text
-  static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
-    height: 1.5,
+  static const TextStyle fieldLabel = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.charcoal,
   );
 
+  // Body Text
   static const TextStyle bodyMedium = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
+    color: AppColors.charcoal,
     height: 1.45,
   );
 
@@ -59,27 +58,27 @@ class AppTextStyles {
     height: 1.4,
   );
 
-  // Data Tables
+  // Table Typography
   static const TextStyle tableHeader = TextStyle(
     fontSize: 13,
     fontWeight: FontWeight.w600,
-    color: AppColors.textSecondary,
-    letterSpacing: 0.3,
+    color: AppColors.deepBlue,
+    letterSpacing: 0.2,
   );
 
   static const TextStyle tableCell = TextStyle(
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
+    color: AppColors.charcoal,
   );
 
   static const TextStyle tableCellBold = TextStyle(
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
+    color: AppColors.charcoal,
   );
 
-  // Buttons & Labels
+  // Button & Badge
   static const TextStyle button = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w600,
@@ -94,7 +93,7 @@ class AppTextStyles {
 
   static const TextStyle caption = TextStyle(
     fontSize: 11,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
     color: AppColors.textMuted,
   );
 }
