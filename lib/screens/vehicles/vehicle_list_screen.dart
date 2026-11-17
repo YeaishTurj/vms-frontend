@@ -230,7 +230,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
             label: 'Register Vehicle',
             icon: Icons.add_rounded,
             variant: AppButtonVariant.primary,
-            isFullWidth: true,
+            fullWidth: true,
             onPressed: () => router.navigateTo(AppScreen.registerVehicle),
           ),
         ],
