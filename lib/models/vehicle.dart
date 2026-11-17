@@ -49,6 +49,31 @@ class Vehicle {
     required this.status,
   });
 
+  /// Factory constructor to deserialize a Vehicle from backend JSON payload.
+  factory Vehicle.fromJson(Map<String, dynamic> json) {
+    return Vehicle(
+      id: json['id'] != null ? json['id'].toString() : '',
+      vehicleNumber: json['vehicleNumber'] as String? ?? '',
+      company: json['company'] as String? ?? '',
+      type: json['type'] as String? ?? 'Sedan',
+      brand: json['brand'] as String? ?? '',
+      model: json['model'] as String? ?? '',
+      status: VehicleStatus.fromString(json['status'] as String? ?? 'Active'),
+    );
+  }
+
+  /// Serializes the Vehicle entity into a JSON payload for backend requests.
+  Map<String, dynamic> toJson() {
+    return {
+      'vehicleNumber': vehicleNumber,
+      'company': company,
+      'type': type,
+      'brand': brand,
+      'model': model,
+      'status': status.label,
+    };
+  }
+
   String get displayName => '$brand $model';
 
   Vehicle copyWith({

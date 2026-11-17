@@ -4,30 +4,45 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/responsive.dart';
-import '../../data/mock_vehicle_data.dart';
-import '../../models/vehicle.dart';
+import '../../data/models/vehicle.dart';
+import '../../data/repositories/vehicle_repository.dart';
 import '../../routing/app_router.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/status_badge.dart';
 
-/// Clean corporate Dashboard Screen displaying fleet summary cards and recent activity.
-class DashboardScreen extends StatelessWidget {
+/// Clean corporate Dashboard Screen displaying live fleet summary cards and recent activity.
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final repository = VehicleRepository();
+      repository.loadDashboardMetrics();
+      repository.fetchVehicles(page: 0, size: 5);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final mockData = MockVehicleData();
+    final repository = VehicleRepository();
     final router = AppRouter();
     final isMobile = Responsive.isMobile(context);
 
     return ListenableBuilder(
-      listenable: mockData,
+      listenable: repository,
       builder: (context, _) {
-        final totalCount = mockData.totalCount;
-        final activeCount = mockData.activeCount;
-        final inactiveCount = mockData.inactiveCount;
-        final maintenanceCount = mockData.maintenanceCount;
-        final recentVehicles = mockData.vehicles.take(5).toList();
+        final totalCount = repository.totalCount;
+        final activeCount = repository.activeCount;
+        final inactiveCount = repository.inactiveCount;
+        final maintenanceCount = repository.maintenanceCount;
+        final recentVehicles = repository.vehicles.take(5).toList();
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(AppConstants.contentPadding),

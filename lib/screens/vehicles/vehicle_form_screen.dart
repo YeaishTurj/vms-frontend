@@ -4,8 +4,9 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/responsive.dart';
-import '../../data/mock_vehicle_data.dart';
-import '../../models/vehicle.dart';
+import '../../data/models/vehicle.dart';
+import '../../data/repositories/vehicle_repository.dart';
+import '../../data/services/api_exception.dart';
 import '../../routing/app_router.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_dropdown.dart';
@@ -34,6 +35,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
   String? _selectedType;
   VehicleStatus? _selectedStatus;
   String? _duplicateError;
+  bool _isSubmitting = false;
 
   bool get _isEditMode => widget.initialVehicle != null;
 
@@ -62,100 +64,135 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
     super.dispose();
   }
 
-  void _handleSave() {
+  Future<void> _handleSave() async {
     setState(() => _duplicateError = null);
 
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    final mockData = MockVehicleData();
+    final repository = VehicleRepository();
     final router = AppRouter();
     final vehicleNumber = _vehicleNumberController.text.trim();
 
-    // Validate duplicate vehicle number against local mock state
-    final isDuplicate = mockData.isVehicleNumberDuplicate(
-      vehicleNumber,
-      excludeId: widget.initialVehicle?.id,
-    );
+    setState(() => _isSubmitting = true);
 
-    if (isDuplicate) {
-      setState(() {
-        _duplicateError =
-            'Vehicle Number "$vehicleNumber" is already registered to another vehicle in the fleet.';
-      });
-      return;
-    }
+    try {
+      if (_isEditMode) {
+        // Update existing record via PUT /vehicles/{id}
+        final updated = widget.initialVehicle!.copyWith(
+          vehicleNumber: vehicleNumber,
+          company: _companyController.text.trim(),
+          type: _selectedType ?? 'Sedan',
+          brand: _brandController.text.trim(),
+          model: _modelController.text.trim(),
+          status: _selectedStatus ?? VehicleStatus.active,
+        );
+        await repository.updateVehicle(updated);
 
-    if (_isEditMode) {
-      // Update existing record
-      final updated = widget.initialVehicle!.copyWith(
-        vehicleNumber: vehicleNumber,
-        company: _companyController.text.trim(),
-        type: _selectedType ?? 'Sedan',
-        brand: _brandController.text.trim(),
-        model: _modelController.text.trim(),
-        status: _selectedStatus ?? VehicleStatus.active,
-      );
-      mockData.updateVehicle(updated);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(
-                Icons.check_circle_rounded,
-                color: AppColors.green,
-                size: 18,
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.green,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text('Vehicle ${updated.vehicleNumber} updated successfully.'),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text('Vehicle ${updated.vehicleNumber} updated successfully.'),
-            ],
+              backgroundColor: AppColors.charcoal,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            ),
+          );
+          router.navigateTo(AppScreen.vehicles);
+        }
+      } else {
+        // Register new record via POST /vehicles
+        final newVehicle = Vehicle(
+          id: '',
+          vehicleNumber: vehicleNumber,
+          company: _companyController.text.trim(),
+          type: _selectedType ?? 'Sedan',
+          brand: _brandController.text.trim(),
+          model: _modelController.text.trim(),
+          status: _selectedStatus ?? VehicleStatus.active,
+        );
+        await repository.registerVehicle(newVehicle);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.green,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Vehicle ${newVehicle.vehicleNumber} registered successfully.',
+                  ),
+                ],
+              ),
+              backgroundColor: AppColors.charcoal,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            ),
+          );
+          router.navigateTo(AppScreen.vehicles);
+        }
+      }
+    } on ApiException catch (e) {
+      if (!mounted) return;
+
+      if (e.isDuplicate) {
+        setState(() {
+          _duplicateError = e.message;
+        });
+      } else if (e.isNotFound) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppColors.red,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text(e.message)),
+              ],
+            ),
+            backgroundColor: AppColors.charcoal,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           ),
-          backgroundColor: AppColors.charcoal,
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        ),
-      );
-    } else {
-      // Register new record
-      final newId = 'vms-${DateTime.now().millisecondsSinceEpoch % 10000}';
-      final newVehicle = Vehicle(
-        id: newId,
-        vehicleNumber: vehicleNumber,
-        company: _companyController.text.trim(),
-        type: _selectedType ?? 'Sedan',
-        brand: _brandController.text.trim(),
-        model: _modelController.text.trim(),
-        status: _selectedStatus ?? VehicleStatus.active,
-      );
-      mockData.addVehicle(newVehicle);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(
-                Icons.check_circle_rounded,
-                color: AppColors.green,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Vehicle ${newVehicle.vehicleNumber} registered successfully.',
-              ),
-            ],
-          ),
-          backgroundColor: AppColors.charcoal,
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        ),
-      );
+        );
+        router.navigateTo(AppScreen.vehicles);
+      } else {
+        setState(() {
+          _duplicateError = e.message;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _duplicateError = 'Operation failed: ${e.toString()}';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
-
-    router.navigateTo(AppScreen.vehicles);
   }
 
   @override
@@ -671,6 +708,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
             label: _isEditMode ? 'Save Changes' : 'Save Vehicle',
             icon: Icons.check_circle_outline_rounded,
             variant: AppButtonVariant.primary,
+            isLoading: _isSubmitting,
             fullWidth: true,
             onPressed: _handleSave,
           ),
@@ -698,6 +736,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
           label: _isEditMode ? 'Save Changes' : 'Save Vehicle',
           icon: Icons.check_circle_outline_rounded,
           variant: AppButtonVariant.primary,
+          isLoading: _isSubmitting,
           onPressed: _handleSave,
         ),
       ],
