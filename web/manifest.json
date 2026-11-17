@@ -1,0 +1,11 @@
+{
+  "name": "Vehicle Management System (VMS)",
+  "short_name": "VMS",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E3A8A",
+  "description": "Professional Corporate Fleet & Vehicle Management Platform",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}
