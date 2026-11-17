@@ -41,6 +41,13 @@ class AppRouter extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setSidebarCollapsed(bool value) {
+    if (_isSidebarCollapsed != value) {
+      _isSidebarCollapsed = value;
+      notifyListeners();
+    }
+  }
+
   void setAuthenticated(bool value) {
     _isAuthenticated = value;
     if (!value) {

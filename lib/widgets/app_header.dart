@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
+import '../core/utils/responsive.dart';
 import '../routing/app_router.dart';
 
 /// Top application header for the Vehicle Management System.
@@ -16,6 +17,8 @@ class AppHeader extends StatelessWidget {
     return ListenableBuilder(
       listenable: router,
       builder: (context, _) {
+        final isMobile = Responsive.isMobile(context);
+
         return Container(
           height: AppConstants.headerHeight,
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -30,18 +33,32 @@ class AppHeader extends StatelessWidget {
               // Sidebar Collapse / Expand Toggle
               IconButton(
                 icon: Icon(
-                  router.isSidebarCollapsed ? Icons.menu : Icons.menu_open,
+                  isMobile
+                      ? Icons.menu
+                      : (router.isSidebarCollapsed
+                            ? Icons.menu
+                            : Icons.menu_open),
                   color: AppColors.textSecondary,
                   size: 20,
                 ),
-                tooltip: 'Toggle Navigation Menu',
-                onPressed: () => router.toggleSidebar(),
+                tooltip: isMobile
+                    ? 'Open Navigation Menu'
+                    : (router.isSidebarCollapsed
+                          ? 'Expand Navigation'
+                          : 'Collapse Navigation'),
+                onPressed: () {
+                  if (isMobile) {
+                    Scaffold.maybeOf(context)?.openDrawer();
+                  } else {
+                    router.toggleSidebar();
+                  }
+                },
               ),
               const SizedBox(width: 8),
 
               // Search Icon / Quick Find
               SizedBox(
-                width: 240,
+                width: isMobile ? 160 : 240,
                 height: 36,
                 child: TextField(
                   style: AppTextStyles.bodyMedium,

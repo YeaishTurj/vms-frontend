@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'core/constants/app_constants.dart';
+import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
+import 'core/utils/responsive.dart';
 import 'routing/app_router.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/login/login_screen.dart';
@@ -42,11 +44,20 @@ class MainShell extends StatelessWidget {
           return const LoginScreen();
         }
 
+        final isMobile = Responsive.isMobile(context);
+
         return Scaffold(
+          drawer: isMobile
+              ? const Drawer(
+                  width: AppConstants.sidebarWidth,
+                  backgroundColor: AppColors.sidebarBackground,
+                  child: AppSidebar(isDrawer: true),
+                )
+              : null,
           body: Row(
             children: [
-              // Fixed Corporate Navigation Sidebar
-              const AppSidebar(),
+              // Fixed Corporate Navigation Sidebar on desktop and tablet
+              if (!isMobile) const AppSidebar(),
 
               // Right Main Canvas (Header + Content Area)
               Expanded(
