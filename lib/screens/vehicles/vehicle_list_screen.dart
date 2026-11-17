@@ -61,6 +61,17 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
 
     try {
       await repository.deleteVehicle(vehicle.id);
+      if (repository.vehicles.isEmpty && repository.currentPage > 0) {
+        await repository.fetchVehicles(
+          page: repository.currentPage - 1,
+          size: _rowsPerPage,
+        );
+      } else {
+        await repository.fetchVehicles(
+          page: repository.currentPage,
+          size: _rowsPerPage,
+        );
+      }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -95,6 +106,27 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(child: Text(e.message)),
+              ],
+            ),
+            backgroundColor: AppColors.charcoal,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppColors.red,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text('Delete failed: ${e.toString()}')),
               ],
             ),
             backgroundColor: AppColors.charcoal,
@@ -240,6 +272,42 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
             color: AppColors.corporateBlue,
             backgroundColor: AppColors.tableHeaderBg,
             minHeight: 2,
+          ),
+
+        if (repository.errorMessage != null && repository.vehicles.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: AppColors.redBg,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  size: 16,
+                  color: AppColors.red,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    repository.errorMessage!,
+                    style: AppTextStyles.caption.copyWith(color: AppColors.red),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => repository.fetchVehicles(
+                    page: repository.currentPage,
+                    size: _rowsPerPage,
+                  ),
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(
+                      color: AppColors.red,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
 
         if (isMobile)

@@ -34,7 +34,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
 
   String? _selectedType;
   VehicleStatus? _selectedStatus;
-  String? _duplicateError;
+  String? _formError;
+  bool _isDuplicateError = false;
+  Map<String, String>? _fieldErrors;
   bool _isSubmitting = false;
 
   bool get _isEditMode => widget.initialVehicle != null;
@@ -53,6 +55,22 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
 
     _selectedType = v?.type ?? Vehicle.commonTypes.first;
     _selectedStatus = v?.status ?? VehicleStatus.active;
+
+    // In edit mode, load fresh vehicle data by ID from the backend to ensure latest state
+    if (v != null && v.id.isNotEmpty) {
+      VehicleRepository().fetchVehicleById(v.id).then((fresh) {
+        if (fresh != null && mounted) {
+          setState(() {
+            _vehicleNumberController.text = fresh.vehicleNumber;
+            _companyController.text = fresh.company;
+            _brandController.text = fresh.brand;
+            _modelController.text = fresh.model;
+            _selectedType = fresh.type;
+            _selectedStatus = fresh.status;
+          });
+        }
+      });
+    }
   }
 
   @override
@@ -65,7 +83,11 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
   }
 
   Future<void> _handleSave() async {
-    setState(() => _duplicateError = null);
+    setState(() {
+      _formError = null;
+      _isDuplicateError = false;
+      _fieldErrors = null;
+    });
 
     if (!_formKey.currentState!.validate()) {
       return;
@@ -81,6 +103,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
       if (_isEditMode) {
         // Update existing record via PUT /vehicles/{id}
         final updated = widget.initialVehicle!.copyWith(
+          id: widget.initialVehicle!.id, // Preserve correct vehicle ID
           vehicleNumber: vehicleNumber,
           company: _companyController.text.trim(),
           type: _selectedType ?? 'Sedan',
@@ -89,6 +112,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
           status: _selectedStatus ?? VehicleStatus.active,
         );
         await repository.updateVehicle(updated);
+        await repository.fetchVehicles(page: repository.currentPage);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -123,7 +147,8 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
           model: _modelController.text.trim(),
           status: _selectedStatus ?? VehicleStatus.active,
         );
-        await repository.registerVehicle(newVehicle);
+        final created = await repository.registerVehicle(newVehicle);
+        await repository.fetchVehicles(page: 0);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -137,7 +162,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Vehicle ${newVehicle.vehicleNumber} registered successfully.',
+                    'Vehicle ${created.vehicleNumber} registered successfully.',
                   ),
                 ],
               ),
@@ -155,7 +180,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
 
       if (e.isDuplicate) {
         setState(() {
-          _duplicateError = e.message;
+          _isDuplicateError = true;
+          _formError = e.message;
+          _fieldErrors = null;
         });
       } else if (e.isNotFound) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -177,15 +204,25 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
           ),
         );
         router.navigateTo(AppScreen.vehicles);
+      } else if (e.isValidationError) {
+        setState(() {
+          _isDuplicateError = false;
+          _formError = e.message;
+          _fieldErrors = e.fieldErrors;
+        });
       } else {
         setState(() {
-          _duplicateError = e.message;
+          _isDuplicateError = false;
+          _formError = e.message;
+          _fieldErrors = null;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _duplicateError = 'Operation failed: ${e.toString()}';
+          _isDuplicateError = false;
+          _formError = 'Operation failed: ${e.toString()}';
+          _fieldErrors = null;
         });
       }
     } finally {
@@ -240,9 +277,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                       const Divider(color: AppColors.border, height: 1),
                       const SizedBox(height: 24),
 
-                      // Duplicate Number Error Banner
-                      if (_duplicateError != null) ...[
-                        _buildDuplicateBanner(),
+                      // Backend Validation / Duplicate Error Banner
+                      if (_formError != null) ...[
+                        _buildErrorBanner(),
                         const SizedBox(height: 24),
                       ],
 
@@ -375,7 +412,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
     );
   }
 
-  Widget _buildDuplicateBanner() {
+  Widget _buildErrorBanner() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -402,9 +439,13 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Duplicate Vehicle Number Detected',
-                  style: TextStyle(
+                Text(
+                  _isDuplicateError
+                      ? 'Duplicate Vehicle Number Detected'
+                      : (_fieldErrors != null
+                          ? 'Validation Failed'
+                          : 'Error Saving Vehicle'),
+                  style: const TextStyle(
                     color: AppColors.red,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -412,13 +453,29 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _duplicateError!,
+                  _formError ?? 'An unexpected error occurred.',
                   style: const TextStyle(
                     color: AppColors.red,
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
+                if (_fieldErrors != null && _fieldErrors!.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  ..._fieldErrors!.entries.map(
+                    (entry) => Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        '• ${entry.key}: ${entry.value}',
+                        style: const TextStyle(
+                          color: AppColors.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -441,12 +498,16 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                 controller: _vehicleNumberController,
                 isRequired: true,
                 prefixIcon: Icons.pin_outlined,
-                errorText: _duplicateError != null
+                errorText: _isDuplicateError
                     ? 'Vehicle number already registered'
-                    : null,
+                    : _fieldErrors?['vehicleNumber'],
                 onChanged: (_) {
-                  if (_duplicateError != null) {
-                    setState(() => _duplicateError = null);
+                  if (_formError != null || _isDuplicateError || _fieldErrors != null) {
+                    setState(() {
+                      _formError = null;
+                      _isDuplicateError = false;
+                      _fieldErrors = null;
+                    });
                   }
                 },
                 validator: (val) {
@@ -465,6 +526,12 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                 controller: _companyController,
                 isRequired: true,
                 prefixIcon: Icons.business_outlined,
+                errorText: _fieldErrors?['company'],
+                onChanged: (_) {
+                  if (_fieldErrors?['company'] != null) {
+                    setState(() => _fieldErrors!.remove('company'));
+                  }
+                },
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
                     return 'Company is required';
@@ -507,6 +574,12 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                 controller: _brandController,
                 isRequired: true,
                 prefixIcon: Icons.branding_watermark_outlined,
+                errorText: _fieldErrors?['brand'],
+                onChanged: (_) {
+                  if (_fieldErrors?['brand'] != null) {
+                    setState(() => _fieldErrors!.remove('brand'));
+                  }
+                },
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
                     return 'Brand is required';
@@ -530,6 +603,12 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                 controller: _modelController,
                 isRequired: true,
                 prefixIcon: Icons.directions_car_outlined,
+                errorText: _fieldErrors?['model'],
+                onChanged: (_) {
+                  if (_fieldErrors?['model'] != null) {
+                    setState(() => _fieldErrors!.remove('model'));
+                  }
+                },
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
                     return 'Model is required';
@@ -588,12 +667,16 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
           controller: _vehicleNumberController,
           isRequired: true,
           prefixIcon: Icons.pin_outlined,
-          errorText: _duplicateError != null
+          errorText: _isDuplicateError
               ? 'Vehicle number already registered'
-              : null,
+              : _fieldErrors?['vehicleNumber'],
           onChanged: (_) {
-            if (_duplicateError != null) {
-              setState(() => _duplicateError = null);
+            if (_formError != null || _isDuplicateError || _fieldErrors != null) {
+              setState(() {
+                _formError = null;
+                _isDuplicateError = false;
+                _fieldErrors = null;
+              });
             }
           },
           validator: (val) {
@@ -610,6 +693,12 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
           controller: _companyController,
           isRequired: true,
           prefixIcon: Icons.business_outlined,
+          errorText: _fieldErrors?['company'],
+          onChanged: (_) {
+            if (_fieldErrors?['company'] != null) {
+              setState(() => _fieldErrors!.remove('company'));
+            }
+          },
           validator: (val) {
             if (val == null || val.trim().isEmpty) {
               return 'Company is required';
@@ -641,6 +730,12 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
           controller: _brandController,
           isRequired: true,
           prefixIcon: Icons.branding_watermark_outlined,
+          errorText: _fieldErrors?['brand'],
+          onChanged: (_) {
+            if (_fieldErrors?['brand'] != null) {
+              setState(() => _fieldErrors!.remove('brand'));
+            }
+          },
           validator: (val) {
             if (val == null || val.trim().isEmpty) {
               return 'Brand is required';
@@ -655,6 +750,12 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
           controller: _modelController,
           isRequired: true,
           prefixIcon: Icons.directions_car_outlined,
+          errorText: _fieldErrors?['model'],
+          onChanged: (_) {
+            if (_fieldErrors?['model'] != null) {
+              setState(() => _fieldErrors!.remove('model'));
+            }
+          },
           validator: (val) {
             if (val == null || val.trim().isEmpty) {
               return 'Model is required';
