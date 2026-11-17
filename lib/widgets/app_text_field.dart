@@ -18,6 +18,7 @@ class AppTextField extends StatelessWidget {
   final int maxLines;
   final bool isRequired;
   final bool enabled;
+  final String? errorText;
 
   const AppTextField({
     super.key,
@@ -34,6 +35,7 @@ class AppTextField extends StatelessWidget {
     this.maxLines = 1,
     this.isRequired = false,
     this.enabled = true,
+    this.errorText,
   });
 
   @override
@@ -58,7 +60,7 @@ class AppTextField extends StatelessWidget {
             ],
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           initialValue: initialValue,
@@ -71,10 +73,17 @@ class AppTextField extends StatelessWidget {
           style: AppTextStyles.bodyMedium,
           decoration: InputDecoration(
             hintText: hint,
+            errorText: errorText,
             prefixIcon: prefixIcon != null
                 ? Icon(prefixIcon, size: 18, color: AppColors.textSecondary)
                 : null,
             suffixIcon: suffixIcon,
+            filled: true,
+            fillColor: AppColors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 13,
+            ),
           ),
         ),
       ],

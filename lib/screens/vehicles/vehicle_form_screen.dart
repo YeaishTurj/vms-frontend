@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/responsive.dart';
 import '../../data/mock_vehicle_data.dart';
 import '../../models/vehicle.dart';
 import '../../routing/app_router.dart';
@@ -11,6 +12,8 @@ import '../../widgets/app_dropdown.dart';
 import '../../widgets/app_text_field.dart';
 
 /// Reusable vehicle form component for both Registering and Editing vehicle records.
+/// Features a 2-column desktop grid, 1-column responsive layout, required-field
+/// validation, duplicate vehicle number detection, and corporate blue/white styling.
 class VehicleFormScreen extends StatefulWidget {
   final Vehicle? initialVehicle;
 
@@ -79,7 +82,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
     if (isDuplicate) {
       setState(() {
         _duplicateError =
-            'Vehicle Number "$vehicleNumber" is already registered to another vehicle.';
+            'Vehicle Number "$vehicleNumber" is already registered to another vehicle in the fleet.';
       });
       return;
     }
@@ -98,11 +101,21 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Vehicle ${updated.vehicleNumber} updated successfully.',
+          content: Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.green,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text('Vehicle ${updated.vehicleNumber} updated successfully.'),
+            ],
           ),
-          backgroundColor: AppColors.green,
+          backgroundColor: AppColors.charcoal,
           duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
       );
     } else {
@@ -121,11 +134,23 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Vehicle ${newVehicle.vehicleNumber} registered successfully.',
+          content: Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.green,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Vehicle ${newVehicle.vehicleNumber} registered successfully.',
+              ),
+            ],
           ),
-          backgroundColor: AppColors.green,
+          backgroundColor: AppColors.charcoal,
           duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
       );
     }
@@ -136,371 +161,72 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
   @override
   Widget build(BuildContext context) {
     final router = AppRouter();
+    final isMobile = Responsive.isMobile(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.contentPadding),
       child: Center(
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 880),
+          constraints: const BoxConstraints(maxWidth: 860),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Screen Header with Back Button and Title
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: AppColors.deepBlue,
-                    ),
-                    tooltip: 'Back to Vehicles',
-                    onPressed: () => router.navigateTo(AppScreen.vehicles),
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _isEditMode ? 'Edit Vehicle' : 'Register Vehicle',
-                        style: AppTextStyles.h1,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _isEditMode
-                            ? 'Update vehicle specifications and current operational status.'
-                            : 'Fill in the required information to register a new vehicle into the fleet.',
-                        style: AppTextStyles.subtitle,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              _buildPageHeader(router, isMobile),
               const SizedBox(height: 24),
 
-              // Form Container Card
+              // White Form Card Container
               Container(
-                padding: const EdgeInsets.all(28),
+                padding: EdgeInsets.all(isMobile ? 20 : 32),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(
                     AppConstants.cardBorderRadius,
                   ),
                   border: Border.all(color: AppColors.border, width: 1),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x08000000),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Section Header inside Card
+                      _buildCardHeader(),
+                      const SizedBox(height: 20),
+                      const Divider(color: AppColors.border, height: 1),
+                      const SizedBox(height: 24),
+
                       // Duplicate Number Error Banner
                       if (_duplicateError != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.redBg,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: AppColors.red.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.error_outline_rounded,
-                                size: 18,
-                                color: AppColors.red,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  _duplicateError!,
-                                  style: AppTextStyles.caption.copyWith(
-                                    color: AppColors.red,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
+                        _buildDuplicateBanner(),
+                        const SizedBox(height: 24),
                       ],
 
-                      // Form Grid (Responsive 2-column on desktop, 1-column on smaller viewports)
+                      // Responsive Form Grid (2-column desktop, 1-column mobile/tablet)
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final isDesktop = constraints.maxWidth >= 640;
 
                           if (isDesktop) {
-                            return Column(
-                              children: [
-                                // Row 1: Vehicle Number & Company
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: AppTextField(
-                                        label: 'Vehicle Number',
-                                        hint: 'e.g., DM-GA-11-2041',
-                                        controller: _vehicleNumberController,
-                                        isRequired: true,
-                                        prefixIcon: Icons.pin_outlined,
-                                        validator: (val) {
-                                          if (val == null ||
-                                              val.trim().isEmpty) {
-                                            return 'Vehicle Number is required';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 20),
-                                    Expanded(
-                                      child: AppTextField(
-                                        label: 'Company',
-                                        hint: 'e.g., Apex Logistics',
-                                        controller: _companyController,
-                                        isRequired: true,
-                                        prefixIcon: Icons.business_outlined,
-                                        validator: (val) {
-                                          if (val == null ||
-                                              val.trim().isEmpty) {
-                                            return 'Company name is required';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-
-                                // Row 2: Type & Brand
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: AppDropdown<String>(
-                                        label: 'Vehicle Type',
-                                        value: _selectedType,
-                                        isRequired: true,
-                                        items: Vehicle.commonTypes.map((type) {
-                                          return DropdownMenuItem(
-                                            value: type,
-                                            child: Text(type),
-                                          );
-                                        }).toList(),
-                                        onChanged: (val) =>
-                                            setState(() => _selectedType = val),
-                                        validator: (val) {
-                                          if (val == null || val.isEmpty) {
-                                            return 'Please select a vehicle type';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 20),
-                                    Expanded(
-                                      child: AppTextField(
-                                        label: 'Brand',
-                                        hint: 'e.g., Toyota, Ford, Volvo',
-                                        controller: _brandController,
-                                        isRequired: true,
-                                        prefixIcon:
-                                            Icons.branding_watermark_outlined,
-                                        validator: (val) {
-                                          if (val == null ||
-                                              val.trim().isEmpty) {
-                                            return 'Brand is required';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-
-                                // Row 3: Model & Status
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: AppTextField(
-                                        label: 'Model',
-                                        hint: 'e.g., Camry, F-150, Sprinter',
-                                        controller: _modelController,
-                                        isRequired: true,
-                                        prefixIcon:
-                                            Icons.directions_car_outlined,
-                                        validator: (val) {
-                                          if (val == null ||
-                                              val.trim().isEmpty) {
-                                            return 'Model is required';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 20),
-                                    Expanded(
-                                      child: AppDropdown<VehicleStatus>(
-                                        label: 'Status',
-                                        value: _selectedStatus,
-                                        isRequired: true,
-                                        items: VehicleStatus.values.map((
-                                          status,
-                                        ) {
-                                          return DropdownMenuItem(
-                                            value: status,
-                                            child: Row(
-                                              children: [
-                                                Container(
-                                                  width: 8,
-                                                  height: 8,
-                                                  decoration: BoxDecoration(
-                                                    color: status.color,
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(status.label),
-                                              ],
-                                            ),
-                                          );
-                                        }).toList(),
-                                        onChanged: (val) => setState(
-                                          () => _selectedStatus = val,
-                                        ),
-                                        validator: (val) {
-                                          if (val == null) {
-                                            return 'Please select a status';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            );
+                            return _buildDesktopGrid();
                           } else {
-                            // Mobile / Tablet single column layout
-                            return Column(
-                              children: [
-                                AppTextField(
-                                  label: 'Vehicle Number',
-                                  hint: 'e.g., DM-GA-11-2041',
-                                  controller: _vehicleNumberController,
-                                  isRequired: true,
-                                  prefixIcon: Icons.pin_outlined,
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) {
-                                      return 'Vehicle Number is required';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                AppTextField(
-                                  label: 'Company',
-                                  hint: 'e.g., Apex Logistics',
-                                  controller: _companyController,
-                                  isRequired: true,
-                                  prefixIcon: Icons.business_outlined,
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) {
-                                      return 'Company is required';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                AppDropdown<String>(
-                                  label: 'Vehicle Type',
-                                  value: _selectedType,
-                                  isRequired: true,
-                                  items: Vehicle.commonTypes.map((type) {
-                                    return DropdownMenuItem(
-                                      value: type,
-                                      child: Text(type),
-                                    );
-                                  }).toList(),
-                                  onChanged: (val) =>
-                                      setState(() => _selectedType = val),
-                                ),
-                                const SizedBox(height: 16),
-                                AppTextField(
-                                  label: 'Brand',
-                                  hint: 'e.g., Toyota, Ford',
-                                  controller: _brandController,
-                                  isRequired: true,
-                                  prefixIcon: Icons.branding_watermark_outlined,
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) {
-                                      return 'Brand is required';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                AppTextField(
-                                  label: 'Model',
-                                  hint: 'e.g., Camry, F-150',
-                                  controller: _modelController,
-                                  isRequired: true,
-                                  prefixIcon: Icons.directions_car_outlined,
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) {
-                                      return 'Model is required';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                AppDropdown<VehicleStatus>(
-                                  label: 'Status',
-                                  value: _selectedStatus,
-                                  isRequired: true,
-                                  items: VehicleStatus.values.map((status) {
-                                    return DropdownMenuItem(
-                                      value: status,
-                                      child: Text(status.label),
-                                    );
-                                  }).toList(),
-                                  onChanged: (val) =>
-                                      setState(() => _selectedStatus = val),
-                                ),
-                              ],
-                            );
+                            return _buildMobileGrid();
                           }
                         },
                       ),
                       const SizedBox(height: 32),
+                      const Divider(color: AppColors.border, height: 1),
+                      const SizedBox(height: 24),
 
-                      // Form Buttons (Save and Cancel)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          AppButton(
-                            label: 'Cancel',
-                            variant: AppButtonVariant.secondary,
-                            onPressed: () =>
-                                router.navigateTo(AppScreen.vehicles),
-                          ),
-                          const SizedBox(width: 14),
-                          AppButton(
-                            label: _isEditMode
-                                ? 'Save Changes'
-                                : 'Save Vehicle',
-                            icon: Icons.check_circle_outline_rounded,
-                            variant: AppButtonVariant.primary,
-                            onPressed: _handleSave,
-                          ),
-                        ],
-                      ),
+                      // Form Actions: Primary Save & Secondary Cancel
+                      _buildActionButtons(router, isMobile),
                     ],
                   ),
                 ),
@@ -508,6 +234,500 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPageHeader(AppRouter router, bool isMobile) {
+    return Row(
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => router.navigateTo(AppScreen.vehicles),
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: AppColors.border, width: 1),
+              ),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.deepBlue,
+                size: 20,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    _isEditMode ? 'Edit Vehicle' : 'Register Vehicle',
+                    style: AppTextStyles.h1,
+                  ),
+                  if (_isEditMode &&
+                      widget.initialVehicle != null &&
+                      !isMobile) ...[
+                    const SizedBox(width: 12),
+                    _buildVehicleNumberBadge(
+                      widget.initialVehicle!.vehicleNumber,
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _isEditMode
+                    ? 'Update vehicle specifications, fleet assignment, and operational status.'
+                    : 'Fill in the required information to register a new vehicle into the fleet.',
+                style: AppTextStyles.subtitle,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCardHeader() {
+    return Row(
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F4F8),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFD0DCE8), width: 1),
+          ),
+          child: const Icon(
+            Icons.directions_car_filled_rounded,
+            color: AppColors.deepBlue,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _isEditMode
+                  ? 'Vehicle Specifications'
+                  : 'New Vehicle Registration',
+              style: AppTextStyles.h3.copyWith(
+                color: AppColors.deepBlue,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 2),
+            const Text(
+              'All fields marked with an asterisk (*) are required.',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDuplicateBanner() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.redBg,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.red.withOpacity(0.3), width: 1),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(
+              Icons.error_outline_rounded,
+              size: 18,
+              color: AppColors.red,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Duplicate Vehicle Number Detected',
+                  style: TextStyle(
+                    color: AppColors.red,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _duplicateError!,
+                  style: const TextStyle(
+                    color: AppColors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopGrid() {
+    return Column(
+      children: [
+        // Row 1: Vehicle Number (Left) & Company (Right)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: AppTextField(
+                label: 'Vehicle Number',
+                hint: 'e.g., DM-GA-11-2041',
+                controller: _vehicleNumberController,
+                isRequired: true,
+                prefixIcon: Icons.pin_outlined,
+                errorText: _duplicateError != null
+                    ? 'Vehicle number already registered'
+                    : null,
+                onChanged: (_) {
+                  if (_duplicateError != null) {
+                    setState(() => _duplicateError = null);
+                  }
+                },
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) {
+                    return 'Vehicle Number is required';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: AppTextField(
+                label: 'Company',
+                hint: 'e.g., Apex Logistics',
+                controller: _companyController,
+                isRequired: true,
+                prefixIcon: Icons.business_outlined,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) {
+                    return 'Company is required';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 22),
+
+        // Row 2: Vehicle Type (Left) & Brand (Right)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: AppDropdown<String>(
+                label: 'Vehicle Type',
+                value: _selectedType,
+                isRequired: true,
+                prefixIcon: Icons.category_outlined,
+                items: Vehicle.commonTypes.map((type) {
+                  return DropdownMenuItem(value: type, child: Text(type));
+                }).toList(),
+                onChanged: (val) => setState(() => _selectedType = val),
+                validator: (val) {
+                  if (val == null || val.isEmpty) {
+                    return 'Please select a vehicle type';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: AppTextField(
+                label: 'Brand',
+                hint: 'e.g., Toyota, Ford, Volvo',
+                controller: _brandController,
+                isRequired: true,
+                prefixIcon: Icons.branding_watermark_outlined,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) {
+                    return 'Brand is required';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 22),
+
+        // Row 3: Model (Left) & Status (Right)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: AppTextField(
+                label: 'Model',
+                hint: 'e.g., Camry, F-150, Sprinter',
+                controller: _modelController,
+                isRequired: true,
+                prefixIcon: Icons.directions_car_outlined,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) {
+                    return 'Model is required';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: AppDropdown<VehicleStatus>(
+                label: 'Status',
+                value: _selectedStatus,
+                isRequired: true,
+                prefixIcon: Icons.toggle_on_outlined,
+                items: VehicleStatus.values.map((status) {
+                  return DropdownMenuItem(
+                    value: status,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: status.color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(status.label),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) => setState(() => _selectedStatus = val),
+                validator: (val) {
+                  if (val == null) {
+                    return 'Please select an operational status';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileGrid() {
+    return Column(
+      children: [
+        AppTextField(
+          label: 'Vehicle Number',
+          hint: 'e.g., DM-GA-11-2041',
+          controller: _vehicleNumberController,
+          isRequired: true,
+          prefixIcon: Icons.pin_outlined,
+          errorText: _duplicateError != null
+              ? 'Vehicle number already registered'
+              : null,
+          onChanged: (_) {
+            if (_duplicateError != null) {
+              setState(() => _duplicateError = null);
+            }
+          },
+          validator: (val) {
+            if (val == null || val.trim().isEmpty) {
+              return 'Vehicle Number is required';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 18),
+        AppTextField(
+          label: 'Company',
+          hint: 'e.g., Apex Logistics',
+          controller: _companyController,
+          isRequired: true,
+          prefixIcon: Icons.business_outlined,
+          validator: (val) {
+            if (val == null || val.trim().isEmpty) {
+              return 'Company is required';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 18),
+        AppDropdown<String>(
+          label: 'Vehicle Type',
+          value: _selectedType,
+          isRequired: true,
+          prefixIcon: Icons.category_outlined,
+          items: Vehicle.commonTypes.map((type) {
+            return DropdownMenuItem(value: type, child: Text(type));
+          }).toList(),
+          onChanged: (val) => setState(() => _selectedType = val),
+          validator: (val) {
+            if (val == null || val.isEmpty) {
+              return 'Please select a vehicle type';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 18),
+        AppTextField(
+          label: 'Brand',
+          hint: 'e.g., Toyota, Ford',
+          controller: _brandController,
+          isRequired: true,
+          prefixIcon: Icons.branding_watermark_outlined,
+          validator: (val) {
+            if (val == null || val.trim().isEmpty) {
+              return 'Brand is required';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 18),
+        AppTextField(
+          label: 'Model',
+          hint: 'e.g., Camry, F-150',
+          controller: _modelController,
+          isRequired: true,
+          prefixIcon: Icons.directions_car_outlined,
+          validator: (val) {
+            if (val == null || val.trim().isEmpty) {
+              return 'Model is required';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 18),
+        AppDropdown<VehicleStatus>(
+          label: 'Status',
+          value: _selectedStatus,
+          isRequired: true,
+          prefixIcon: Icons.toggle_on_outlined,
+          items: VehicleStatus.values.map((status) {
+            return DropdownMenuItem(
+              value: status,
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: status.color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(status.label),
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: (val) => setState(() => _selectedStatus = val),
+          validator: (val) {
+            if (val == null) {
+              return 'Please select an operational status';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(AppRouter router, bool isMobile) {
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppButton(
+            label: _isEditMode ? 'Save Changes' : 'Save Vehicle',
+            icon: Icons.check_circle_outline_rounded,
+            variant: AppButtonVariant.primary,
+            fullWidth: true,
+            onPressed: _handleSave,
+          ),
+          const SizedBox(height: 10),
+          AppButton(
+            label: 'Cancel',
+            variant: AppButtonVariant.secondary,
+            fullWidth: true,
+            onPressed: () => router.navigateTo(AppScreen.vehicles),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        AppButton(
+          label: 'Cancel',
+          variant: AppButtonVariant.secondary,
+          onPressed: () => router.navigateTo(AppScreen.vehicles),
+        ),
+        const SizedBox(width: 14),
+        AppButton(
+          label: _isEditMode ? 'Save Changes' : 'Save Vehicle',
+          icon: Icons.check_circle_outline_rounded,
+          variant: AppButtonVariant.primary,
+          onPressed: _handleSave,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVehicleNumberBadge(String vehicleNumber) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F4F8),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFFD0DCE8), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.directions_car_rounded,
+            size: 14,
+            color: AppColors.deepBlue,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            vehicleNumber,
+            style: const TextStyle(
+              color: AppColors.deepBlue,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }

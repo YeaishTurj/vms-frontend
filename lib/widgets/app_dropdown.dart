@@ -12,6 +12,8 @@ class AppDropdown<T> extends StatelessWidget {
   final String? Function(T?)? validator;
   final String? hint;
   final bool isRequired;
+  final IconData? prefixIcon;
+  final String? errorText;
 
   const AppDropdown({
     super.key,
@@ -22,6 +24,8 @@ class AppDropdown<T> extends StatelessWidget {
     this.validator,
     this.hint,
     this.isRequired = false,
+    this.prefixIcon,
+    this.errorText,
   });
 
   @override
@@ -46,7 +50,7 @@ class AppDropdown<T> extends StatelessWidget {
             ],
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         DropdownButtonFormField<T>(
           value: value,
           items: items,
@@ -62,8 +66,17 @@ class AppDropdown<T> extends StatelessWidget {
                   ),
                 )
               : null,
-          decoration: const InputDecoration(
-            contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: AppColors.white,
+            errorText: errorText,
+            prefixIcon: prefixIcon != null
+                ? Icon(prefixIcon, size: 18, color: AppColors.textSecondary)
+                : null,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 13,
+            ),
           ),
           icon: const Icon(
             Icons.keyboard_arrow_down_rounded,
