@@ -11,8 +11,10 @@ WORKDIR /app
 COPY pubspec.yaml ./
 RUN flutter pub get
 
-# Copy source and compile release web bundle with canvaskit
+# Copy source and verify code quality with static analysis and test suite
 COPY . .
+RUN flutter analyze
+RUN flutter test
 RUN flutter build web --release --no-web-resources-cdn
 
 # Stage 2: Serve via Nginx
