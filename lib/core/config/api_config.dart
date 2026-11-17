@@ -3,12 +3,17 @@
 class ApiConfig {
   ApiConfig._();
 
-  /// Backend REST API Base URL.
+  /// Raw backend REST API Base URL.
   /// Overridable at compile time using: --dart-define=API_BASE_URL=http://your-host:port
-  static const String baseUrl = String.fromEnvironment(
+  static const String _rawBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://localhost:8081',
   );
+
+  /// Backend REST API Base URL with trailing slash stripped to prevent double-slash routing issues.
+  static String get baseUrl => _rawBaseUrl.endsWith('/')
+      ? _rawBaseUrl.substring(0, _rawBaseUrl.length - 1)
+      : _rawBaseUrl;
 
   /// Default timeout for HTTP requests.
   static const Duration timeout = Duration(seconds: 15);

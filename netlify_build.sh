@@ -35,8 +35,9 @@ flutter analyze lib --no-fatal-infos --no-fatal-warnings || true
 # 5. Build production Web release
 echo "-> Compiling production web release (flutter build web)..."
 if [ -n "$API_BASE_URL" ]; then
-    echo "-> Injecting production API_BASE_URL: $API_BASE_URL"
-    flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL"
+    CLEAN_API_BASE_URL="${API_BASE_URL%/}"
+    echo "-> Injecting production API_BASE_URL: $CLEAN_API_BASE_URL (normalized from '$API_BASE_URL')"
+    flutter build web --release --dart-define=API_BASE_URL="$CLEAN_API_BASE_URL"
 else
     echo "-> No custom API_BASE_URL environment variable set. Compiling with default ApiConfig."
     flutter build web --release
