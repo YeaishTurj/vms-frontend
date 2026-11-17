@@ -1,0 +1,15 @@
+services:
+  vms-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vms-frontend:latest
+    container_name: vms-frontend
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
