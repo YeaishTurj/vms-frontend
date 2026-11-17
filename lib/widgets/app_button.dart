@@ -9,7 +9,7 @@ enum AppButtonVariant {
   danger, // Red (#D32F2F)
 }
 
-/// Standardized VMS button component.
+/// Standardized VMS button component with consistent height, border-radius, and typography.
 class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -72,7 +72,14 @@ class AppButton extends StatelessWidget {
           Icon(icon, size: 16, color: fg),
           const SizedBox(width: 8),
         ],
-        Text(label, style: AppTextStyles.button.copyWith(color: fg)),
+        Text(
+          label,
+          style: AppTextStyles.button.copyWith(
+            color: fg,
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
 
@@ -88,6 +95,15 @@ class AppButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
             border: border != BorderSide.none
                 ? Border.fromBorderSide(border!)
+                : null,
+            boxShadow: !isButtonDisabled && variant == AppButtonVariant.primary
+                ? [
+                    BoxShadow(
+                      color: AppColors.corporateBlue.withOpacity(0.25),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
                 : null,
           ),
           child: child,

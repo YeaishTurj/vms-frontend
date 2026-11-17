@@ -303,9 +303,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F4F8),
+            color: AppColors.plateBg,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFD0DCE8), width: 1),
+            border: Border.all(color: AppColors.plateBorder, width: 1),
           ),
           child: const Icon(
             Icons.directions_car_filled_rounded,
@@ -705,9 +705,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F4F8),
+        color: AppColors.plateBg,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFD0DCE8), width: 1),
+        border: Border.all(color: AppColors.plateBorder, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

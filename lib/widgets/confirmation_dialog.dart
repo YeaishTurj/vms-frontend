@@ -80,9 +80,27 @@ class ConfirmationDialog extends StatelessWidget {
                   Row(
                     children: [
                       const Text('Vehicle No: ', style: AppTextStyles.caption),
-                      Text(
-                        vehicle.vehicleNumber,
-                        style: AppTextStyles.tableCellBold,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.plateBg,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: AppColors.plateBorder,
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          vehicle.vehicleNumber,
+                          style: const TextStyle(
+                            color: AppColors.deepBlue,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ],
                   ),

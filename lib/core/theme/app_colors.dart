@@ -46,4 +46,14 @@ class AppColors {
   static const Color sidebarHover = Color(0xFF285E8E);
   static const Color sidebarText = Color(0xFFD1D5DB);
   static const Color sidebarTextActive = Color(0xFFFFFFFF);
+  static const Color sidebarSubtext = Color(0xFF90CAF9);
+
+  // Surface, Table & Badge Accents
+  static const Color tableHeaderBg = Color(0xFFF8FAFC);
+  static const Color plateBg = Color(0xFFF0F4F8);
+  static const Color plateBorder = Color(0xFFD0DCE8);
+  static const Color actionEditBg = Color(0xFFEBF3FA);
+  static const Color actionEditBorder = Color(0xFFD0E2F3);
+  static const Color actionDeleteBg = Color(0xFFFEE2E2);
+  static const Color actionDeleteBorder = Color(0xFFFECACA);
 }

@@ -100,8 +100,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.deepBlue,
+                          color: AppColors.corporateBlue,
                           borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.corporateBlue.withOpacity(0.3),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: const Icon(
                           Icons.directions_car_filled_rounded,
@@ -225,9 +232,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.softGray,
+                      color: AppColors.plateBg,
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.border, width: 1),
+                      border: Border.all(
+                        color: AppColors.plateBorder,
+                        width: 1,
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

@@ -127,11 +127,11 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
             children: [
               // Screen Header: Title (Top Left) & Main Action (Top Right)
               _buildScreenHeader(router, mockData.vehicles.length, isMobile),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
               // Search and Filter Controls Toolbar
               _buildFilterToolbar(hasActiveFilters, isMobile),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
               // Clean White Table Container
               Container(
@@ -335,7 +335,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     : null,
                 isDense: true,
                 filled: true,
-                fillColor: const Color(0xFFF8FAFC),
+                fillColor: AppColors.tableHeaderBg,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 8,
@@ -349,7 +349,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppColors.tableHeaderBg,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: AppColors.border, width: 1),
             ),
@@ -401,7 +401,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppColors.tableHeaderBg,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: AppColors.border, width: 1),
             ),
@@ -486,10 +486,10 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
               minWidth: constraints.maxWidth < 920 ? 920 : constraints.maxWidth,
             ),
             child: DataTable(
-              headingRowColor: WidgetStateProperty.all(const Color(0xFFF8FAFC)),
+              headingRowColor: WidgetStateProperty.all(AppColors.tableHeaderBg),
               dataRowColor: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.hovered)) {
-                  return const Color(0xFFF8FAFC);
+                  return AppColors.tableHeaderBg;
                 }
                 return AppColors.white;
               }),
@@ -649,8 +649,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                             icon: Icons.edit_outlined,
                             tooltip: 'Edit Vehicle',
                             color: AppColors.corporateBlue,
-                            bgColor: const Color(0xFFEBF3FA),
-                            borderColor: const Color(0xFFD0E2F3),
+                            bgColor: AppColors.actionEditBg,
+                            borderColor: AppColors.actionEditBorder,
                             onTap: () => router.navigateToEditVehicle(vehicle),
                           ),
                           const SizedBox(width: 8),
@@ -658,8 +658,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                             icon: Icons.delete_outline_rounded,
                             tooltip: 'Delete Vehicle',
                             color: AppColors.red,
-                            bgColor: const Color(0xFFFEE2E2),
-                            borderColor: const Color(0xFFFECACA),
+                            bgColor: AppColors.actionDeleteBg,
+                            borderColor: AppColors.actionDeleteBorder,
                             onTap: () =>
                                 _handleDelete(context, mockData, vehicle),
                           ),
@@ -731,8 +731,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     icon: Icons.edit_outlined,
                     tooltip: 'Edit Vehicle',
                     color: AppColors.corporateBlue,
-                    bgColor: const Color(0xFFEBF3FA),
-                    borderColor: const Color(0xFFD0E2F3),
+                    bgColor: AppColors.actionEditBg,
+                    borderColor: AppColors.actionEditBorder,
                     onTap: () => router.navigateToEditVehicle(vehicle),
                   ),
                   const SizedBox(width: 8),
@@ -740,8 +740,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     icon: Icons.delete_outline_rounded,
                     tooltip: 'Delete Vehicle',
                     color: AppColors.red,
-                    bgColor: const Color(0xFFFEE2E2),
-                    borderColor: const Color(0xFFFECACA),
+                    bgColor: AppColors.actionDeleteBg,
+                    borderColor: AppColors.actionDeleteBorder,
                     onTap: () => _handleDelete(context, mockData, vehicle),
                   ),
                 ],
@@ -775,9 +775,9 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F4F8),
+        color: AppColors.plateBg,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFD0DCE8), width: 1),
+        border: Border.all(color: AppColors.plateBorder, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
