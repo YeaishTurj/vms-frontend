@@ -1,13 +1,13 @@
 # Vehicle Management System (VMS) — Frontend
 
-Professional corporate vehicle management web application built with **Flutter Web**, **Dart**, and **Material 3**.
+Professional corporate vehicle management web application built with **Flutter Web**, **Dart**, and **Material 3**, fully integrated with a **Java Spring Boot REST API** backend.
 
 ---
 
 ## Design System & Style Guide
 
-The UI follows the corporate VMS design language:
-- **Desktop-first responsive layout:** Fixed left navigation drawer, sticky application header, and high-density data views.
+The UI strictly follows the corporate VMS design language:
+- **Desktop-first responsive layout:** Fixed left navigation drawer, sticky application header, and high-density corporate data views.
 - **Enterprise Blue Palette:**
   - **Deep Blue (`#1F4E79`):** Left sidebar navigation, brand headers, and primary card titles.
   - **Corporate Blue (`#5B9BD5`):** Primary action buttons, active navigation indicators, and focus states.
@@ -15,29 +15,31 @@ The UI follows the corporate VMS design language:
   - **White (`#FFFFFF`):** Cards, tables, and form containers.
   - **Charcoal (`#1F2937`):** Primary text and dark accents.
   - **Green (`#2E7D32`):** Active / operational status.
-  - **Red (`#D32F2F`):** Inactive status, delete buttons, and validation errors.
+  - **Red (`#D32F2F`):** Inactive status, delete actions, and validation errors.
   - **Amber (`#E65100`):** Under Maintenance status.
 
 ---
 
 ## Core Feature Overview
 
-### 1. Authentication (Mock Login)
-- Centered card layout on soft gray background.
-- Pre-filled sample credentials (`admin` / `password123`) for demonstration.
-- Form validation and password visibility toggle.
-- Navigates to Dashboard upon sign-in.
+### 1. Spring Boot JWT Authentication
+- Centered sign-in card layout on soft gray background.
+- Connects to Spring Boot backend `POST /auth/login`.
+- Transmits credentials securely; passwords are never logged, exposed, or permanently stored.
+- Secure session management using browser tab-isolated `sessionStorage`.
+- Detects expired sessions and invalid tokens (HTTP 401), automatically returning to login with a friendly session-expired banner.
+- Secure logout clearing all session state and cached tokens.
 
 ### 2. Fleet Dashboard
-- 4 Operational Metric Cards:
+- 4 Operational Metric KPI Cards:
   - **Total Vehicles** (Navy)
   - **Active Vehicles** (Green)
   - **Inactive Vehicles** (Red)
   - **Vehicles Under Maintenance** (Amber)
-- Quick overview data table displaying the most recently updated units.
-- Direct navigation to registration and full directory.
+- Quick overview data table displaying the most recently registered and updated units.
+- Fast navigation to registration form and full vehicle directory.
 
-### 3. Vehicle Inventory Directory
+### 3. Vehicle Inventory Directory (Paginated REST API)
 - Comprehensive vehicle table displaying:
   - Vehicle Number
   - Company
@@ -46,21 +48,21 @@ The UI follows the corporate VMS design language:
   - Model
   - Status (Color-coded badge)
   - Actions (Edit & Delete)
-- **Search:** Real-time search across Vehicle Number, Company, Brand, and Model.
-- **Filters:** Dropdown filters for Status and Type, with a "Clear Filters" action.
-- **Pagination:** Configurable rows per page (5, 8, 12) with page counters and navigation.
-- **Empty States:** Friendly feedback with filter reset button when queries return 0 results.
+- **Real-Time REST Integration:** Fetches paginated vehicle records via `GET /vehicles?page=X&size=Y`.
+- **Search & Filters:** Real-time client and server-aligned filtering across Vehicle Number, Company, Brand, and Model.
+- **Pagination Controls:** Configurable page sizes (5, 8, 12, 20) with page indicators and navigation buttons.
+- **State Handling:** Loading skeletons, error state with retry button, and friendly empty-state feedback.
 
-### 4. Vehicle Registration & Modification
-- Reusable form component handling both **Registering** and **Editing** vehicles.
-- Responsive 2-column layout on desktop, 1-column on mobile.
-- Required-field validation with error messages.
-- **Duplicate Number Prevention:** Validates vehicle number uniqueness against local mock data (excluding the vehicle's own ID during edits).
+### 4. Vehicle Registration & Modification (CRUD)
+- Reusable form component handling both **Registering** (`POST /vehicles`) and **Editing** (`PUT /vehicles/{id}`).
+- Pre-populates existing vehicle data during editing.
+- Client-side validation combined with backend validation error display.
+- **Duplicate Number Handling:** Displays friendly error banner when the backend returns HTTP 409 Conflict.
+- **Success Feedback:** Snackbars confirm successful creation and updates.
 
-### 5. Local In-Memory Management
-- Managed via `MockVehicleData` singleton with 10 seed corporate vehicles.
-- All additions, updates, and deletions reflect instantly across all screens.
-- Zero external backend dependencies or network overhead.
+### 5. Vehicle Deletion
+- Delete vehicle action with confirmation modal dialog (`DELETE /vehicles/{id}`).
+- Immediately removes vehicle upon confirmation and reloads the directory.
 
 ---
 
@@ -69,61 +71,132 @@ The UI follows the corporate VMS design language:
 ```
 vms-frontend/
 ├── lib/
-│   ├── main.dart                    # Application bootstrap
-│   ├── app.dart                     # MaterialApp & MainShell layout
+│   ├── main.dart                               # Application bootstrap
+│   ├── app.dart                                # MaterialApp & Shell layout
 │   │
 │   ├── core/
-│   │   ├── theme/
-│   │   │   ├── app_colors.dart      # VMS corporate color palette
-│   │   │   ├── app_text_styles.dart # Typography scale
-│   │   │   └── app_theme.dart       # Material 3 ThemeData
+│   │   ├── config/
+│   │   │   └── api_config.dart                 # API base URL & endpoint builder
 │   │   ├── constants/
-│   │   │   └── app_constants.dart   # Layout dimensions & sample credentials
+│   │   │   └── app_constants.dart              # Layout dimensions & defaults
+│   │   ├── theme/
+│   │   │   ├── app_colors.dart                 # VMS corporate color palette
+│   │   │   ├── app_text_styles.dart            # Typography scale
+│   │   │   └── app_theme.dart                  # Material 3 ThemeData
 │   │   └── utils/
-│   │       └── responsive.dart      # Breakpoint helper
-│   │
-│   ├── models/
-│   │   └── vehicle.dart             # Vehicle entity & VehicleStatus enum
+│   │       └── responsive.dart                 # Responsive breakpoint helpers
 │   │
 │   ├── data/
-│   │   └── mock_vehicle_data.dart   # In-memory reactive fleet repository
+│   │   ├── models/
+│   │   │   ├── auth_session.dart               # JWT token & session model
+│   │   │   ├── paginated_vehicles.dart         # Spring Page response wrapper
+│   │   │   └── vehicle.dart                    # Vehicle entity & VehicleStatus enum
+│   │   ├── repositories/
+│   │   │   └── vehicle_repository.dart         # Vehicle repository abstraction
+│   │   └── services/
+│   │       ├── api_client.dart                 # HTTP client with JWT interceptor
+│   │       ├── api_exception.dart              # Standardized API exception model
+│   │       ├── auth_service.dart               # Authentication & session service
+│   │       ├── vehicle_api_service.dart        # Vehicle REST API client
+│   │       └── session_storage/                # Platform-specific session storage
+│   │           ├── session_storage.dart
+│   │           ├── session_storage_base.dart
+│   │           ├── session_storage_stub.dart
+│   │           └── session_storage_web.dart
 │   │
 │   ├── routing/
-│   │   └── app_router.dart          # Navigation coordinator & screen state
+│   │   └── app_router.dart                     # Screen navigation coordinator
 │   │
-│   ├── widgets/
-│   │   ├── app_sidebar.dart         # Fixed left drawer with active highlights
-│   │   ├── app_header.dart          # Clean white top bar with profile & search
-│   │   ├── app_button.dart          # Standardized buttons (Primary, Secondary, Danger)
-│   │   ├── app_text_field.dart      # Reusable form field
-│   │   ├── app_dropdown.dart        # Reusable dropdown field
-│   │   ├── status_badge.dart        # Pill status indicator
-│   │   ├── confirmation_dialog.dart # Delete confirmation modal
-│   │   └── empty_state.dart         # Clean empty state widget
+│   ├── screens/
+│   │   ├── dashboard/
+│   │   │   └── dashboard_screen.dart           # KPI cards & overview table
+│   │   ├── login/
+│   │   │   └── login_screen.dart               # Corporate sign-in form
+│   │   └── vehicles/
+│   │       ├── vehicle_form_screen.dart        # Register & Edit vehicle form
+│   │       └── vehicle_list_screen.dart        # Paginated vehicle directory
 │   │
-│   └── screens/
-│       ├── login/
-│       │   └── login_screen.dart        # Corporate sign-in card
-│       ├── dashboard/
-│       │   └── dashboard_screen.dart    # KPI summary cards & overview table
-│       └── vehicles/
-│           ├── vehicle_list_screen.dart # Filterable data table & pagination
-│           └── vehicle_form_screen.dart # Reusable register/edit form
+│   └── widgets/
+│       ├── app_button.dart                     # Standardized buttons (Primary, Secondary, Danger)
+│       ├── app_dropdown.dart                   # Styled dropdown selector
+│       ├── app_header.dart                     # Header bar with user profile & logout
+│       ├── app_sidebar.dart                    # Fixed left navigation drawer
+│       ├── app_text_field.dart                 # Standardized text input
+│       ├── confirmation_dialog.dart            # Modal confirmation dialog
+│       ├── empty_state.dart                    # Empty state illustration widget
+│       └── status_badge.dart                   # Status pill badge
+│
+├── test/                                       # Unit and Widget test suite
+├── web/                                        # Web assets and index.html
+├── Dockerfile                                  # Multi-stage Docker build
+├── docker-compose.yml                          # Container orchestration
+├── run.sh                                      # Automated local launcher
+├── pubspec.yaml                                # Dependencies & package manifest
+└── README.md
 ```
+
+---
+
+## Configuration & Environment
+
+The backend REST API base URL is configurable at compile time:
+
+```bash
+# Default points to local Spring Boot backend: http://localhost:8081
+flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8081
+
+# Production with HTTPS:
+flutter build web --dart-define=API_BASE_URL=https://api.vms.company.com
+```
+
+### Security Considerations:
+- **No Secrets in Source:** No passwords, private keys, or API tokens are hardcoded or tracked in Git.
+- **Secure Sessions:** JWT tokens are stored only in memory and browser `sessionStorage` (cleared automatically upon tab closure).
+- **Transport Security:** Enforces HTTPS for all remote non-loopback endpoints in production mode.
 
 ---
 
 ## Running Locally
 
-### With Host Runner:
+### Option 1: Using Flutter CLI Directly
+```bash
+cd /home/yeaish/repos/vms-frontend
+
+# Install dependencies
+flutter pub get
+
+# Run in Chrome
+flutter run -d chrome --web-port=8080
+```
+
+### Option 2: Automated Launcher
 ```bash
 cd /home/yeaish/repos/vms-frontend
 ./run.sh
 ```
 
-### With Docker Compose:
+### Option 3: With Docker Compose
 ```bash
 cd /home/yeaish/repos/vms-frontend
 docker compose up -d
 ```
-Access at: [http://localhost:8080](http://localhost:8080)
+Access the application at: [http://localhost:8080](http://localhost:8080)
+
+---
+
+## Quality Assurance & Testing
+
+Run static analysis:
+```bash
+flutter analyze
+```
+
+Run test suite:
+```bash
+flutter test
+```
+
+Build production web bundle:
+```bash
+flutter build web
+```
