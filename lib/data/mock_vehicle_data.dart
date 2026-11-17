@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/vehicle.dart';
 
 /// In-memory reactive repository managing the VMS fleet data.

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
@@ -46,22 +47,40 @@ class AppHeader extends StatelessWidget {
                   style: AppTextStyles.bodyMedium,
                   decoration: InputDecoration(
                     hintText: 'Search VMS...',
-                    hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
-                    prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.textSecondary),
+                    hintStyle: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      size: 18,
+                      color: AppColors.textSecondary,
+                    ),
                     filled: true,
                     fillColor: AppColors.softGray,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 10,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: AppColors.border, width: 1),
+                      borderSide: const BorderSide(
+                        color: AppColors.border,
+                        width: 1,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: AppColors.border, width: 1),
+                      borderSide: const BorderSide(
+                        color: AppColors.border,
+                        width: 1,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: AppColors.corporateBlue, width: 1.5),
+                      borderSide: const BorderSide(
+                        color: AppColors.corporateBlue,
+                        width: 1.5,
+                      ),
                     ),
                   ),
                   onSubmitted: (query) {
@@ -79,12 +98,18 @@ class AppHeader extends StatelessWidget {
                 alignment: Alignment.topRight,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.notifications_none_rounded, size: 22, color: AppColors.textSecondary),
+                    icon: const Icon(
+                      Icons.notifications_none_rounded,
+                      size: 22,
+                      color: AppColors.textSecondary,
+                    ),
                     tooltip: 'System Notifications',
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('All fleet systems operational. 0 pending alerts.'),
+                          content: Text(
+                            'All fleet systems operational. 0 pending alerts.',
+                          ),
                           duration: Duration(seconds: 2),
                         ),
                       );
@@ -107,11 +132,7 @@ class AppHeader extends StatelessWidget {
               const SizedBox(width: 8),
 
               // Vertical Divider
-              Container(
-                height: 24,
-                width: 1,
-                color: AppColors.border,
-              ),
+              Container(height: 24, width: 1, color: AppColors.border),
               const SizedBox(width: 16),
 
               // User Profile & Avatar
@@ -136,7 +157,9 @@ class AppHeader extends StatelessWidget {
                     children: [
                       Text(
                         'Admin User',
-                        style: AppTextStyles.tableCellBold.copyWith(fontSize: 13),
+                        style: AppTextStyles.tableCellBold.copyWith(
+                          fontSize: 13,
+                        ),
                       ),
                       Text(
                         'Fleet Manager',

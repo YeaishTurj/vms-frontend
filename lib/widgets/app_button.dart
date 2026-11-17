@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
 
 enum AppButtonVariant {
-  primary,   // Corporate Blue (#5B9BD5)
+  primary, // Corporate Blue (#5B9BD5)
   secondary, // White with border
-  danger,    // Red (#D32F2F)
+  danger, // Red (#D32F2F)
 }
 
 /// Standardized VMS button component.
@@ -71,10 +72,7 @@ class AppButton extends StatelessWidget {
           Icon(icon, size: 16, color: fg),
           const SizedBox(width: 8),
         ],
-        Text(
-          label,
-          style: AppTextStyles.button.copyWith(color: fg),
-        ),
+        Text(label, style: AppTextStyles.button.copyWith(color: fg)),
       ],
     );
 
@@ -88,7 +86,9 @@ class AppButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: isButtonDisabled ? AppColors.border : bg,
             borderRadius: BorderRadius.circular(6),
-            border: border != BorderSide.none ? Border.fromBorderSide(border!) : null,
+            border: border != BorderSide.none
+                ? Border.fromBorderSide(border!)
+                : null,
           ),
           child: child,
         ),

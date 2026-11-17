@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -16,8 +17,12 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController(text: AppConstants.demoUsername);
-  final _passwordController = TextEditingController(text: AppConstants.demoPassword);
+  final _usernameController = TextEditingController(
+    text: AppConstants.demoUsername,
+  );
+  final _passwordController = TextEditingController(
+    text: AppConstants.demoPassword,
+  );
 
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -70,7 +75,9 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.all(36),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+              borderRadius: BorderRadius.circular(
+                AppConstants.cardBorderRadius,
+              ),
               border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
@@ -129,16 +136,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: BoxDecoration(
                         color: AppColors.redBg,
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppColors.red.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: AppColors.red.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline_rounded, size: 16, color: AppColors.red),
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            size: 16,
+                            color: AppColors.red,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _errorMessage!,
-                              style: AppTextStyles.caption.copyWith(color: AppColors.red),
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.red,
+                              ),
                             ),
                           ),
                         ],
@@ -179,7 +194,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         size: 18,
                         color: AppColors.textSecondary,
                       ),
-                      tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                      tooltip: _obscurePassword
+                          ? 'Show password'
+                          : 'Hide password',
                       onPressed: () {
                         setState(() => _obscurePassword = !_obscurePassword);
                       },
@@ -217,7 +234,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.info_outline_rounded, size: 14, color: AppColors.deepBlue),
+                            const Icon(
+                              Icons.info_outline_rounded,
+                              size: 14,
+                              color: AppColors.deepBlue,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               'Sample Credentials (Mock Login)',
@@ -232,8 +253,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Username: ${AppConstants.demoUsername}', style: AppTextStyles.caption),
-                            Text('Password: ${AppConstants.demoPassword}', style: AppTextStyles.caption),
+                            Text(
+                              'Username: ${AppConstants.demoUsername}',
+                              style: AppTextStyles.caption,
+                            ),
+                            Text(
+                              'Password: ${AppConstants.demoPassword}',
+                              style: AppTextStyles.caption,
+                            ),
                           ],
                         ),
                       ],

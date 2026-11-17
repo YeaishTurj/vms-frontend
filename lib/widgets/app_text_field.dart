@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
 
@@ -43,10 +44,7 @@ class AppTextField extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              label,
-              style: AppTextStyles.fieldLabel,
-            ),
+            Text(label, style: AppTextStyles.fieldLabel),
             if (isRequired) ...[
               const SizedBox(width: 4),
               const Text(

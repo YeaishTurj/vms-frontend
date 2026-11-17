@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -13,10 +14,7 @@ import '../../widgets/app_text_field.dart';
 class VehicleFormScreen extends StatefulWidget {
   final Vehicle? initialVehicle;
 
-  const VehicleFormScreen({
-    super.key,
-    this.initialVehicle,
-  });
+  const VehicleFormScreen({super.key, this.initialVehicle});
 
   @override
   State<VehicleFormScreen> createState() => _VehicleFormScreenState();
@@ -41,7 +39,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
     super.initState();
     final v = widget.initialVehicle;
 
-    _vehicleNumberController = TextEditingController(text: v?.vehicleNumber ?? '');
+    _vehicleNumberController = TextEditingController(
+      text: v?.vehicleNumber ?? '',
+    );
     _companyController = TextEditingController(text: v?.company ?? '');
     _brandController = TextEditingController(text: v?.brand ?? '');
     _modelController = TextEditingController(text: v?.model ?? '');
@@ -78,7 +78,8 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
 
     if (isDuplicate) {
       setState(() {
-        _duplicateError = 'Vehicle Number "$vehicleNumber" is already registered to another vehicle.';
+        _duplicateError =
+            'Vehicle Number "$vehicleNumber" is already registered to another vehicle.';
       });
       return;
     }
@@ -97,7 +98,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Vehicle ${updated.vehicleNumber} updated successfully.'),
+          content: Text(
+            'Vehicle ${updated.vehicleNumber} updated successfully.',
+          ),
           backgroundColor: AppColors.green,
           duration: const Duration(seconds: 3),
         ),
@@ -118,7 +121,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Vehicle ${newVehicle.vehicleNumber} registered successfully.'),
+          content: Text(
+            'Vehicle ${newVehicle.vehicleNumber} registered successfully.',
+          ),
           backgroundColor: AppColors.green,
           duration: const Duration(seconds: 3),
         ),
@@ -144,7 +149,10 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded, color: AppColors.deepBlue),
+                    icon: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppColors.deepBlue,
+                    ),
                     tooltip: 'Back to Vehicles',
                     onPressed: () => router.navigateTo(AppScreen.vehicles),
                   ),
@@ -174,7 +182,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                 padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.cardBorderRadius,
+                  ),
                   border: Border.all(color: AppColors.border, width: 1),
                 ),
                 child: Form(
@@ -189,11 +199,17 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                           decoration: BoxDecoration(
                             color: AppColors.redBg,
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: AppColors.red.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: AppColors.red.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline_rounded, size: 18, color: AppColors.red),
+                              const Icon(
+                                Icons.error_outline_rounded,
+                                size: 18,
+                                color: AppColors.red,
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
@@ -231,7 +247,8 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                                         isRequired: true,
                                         prefixIcon: Icons.pin_outlined,
                                         validator: (val) {
-                                          if (val == null || val.trim().isEmpty) {
+                                          if (val == null ||
+                                              val.trim().isEmpty) {
                                             return 'Vehicle Number is required';
                                           }
                                           return null;
@@ -247,7 +264,8 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                                         isRequired: true,
                                         prefixIcon: Icons.business_outlined,
                                         validator: (val) {
-                                          if (val == null || val.trim().isEmpty) {
+                                          if (val == null ||
+                                              val.trim().isEmpty) {
                                             return 'Company name is required';
                                           }
                                           return null;
@@ -273,7 +291,8 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                                             child: Text(type),
                                           );
                                         }).toList(),
-                                        onChanged: (val) => setState(() => _selectedType = val),
+                                        onChanged: (val) =>
+                                            setState(() => _selectedType = val),
                                         validator: (val) {
                                           if (val == null || val.isEmpty) {
                                             return 'Please select a vehicle type';
@@ -289,9 +308,11 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                                         hint: 'e.g., Toyota, Ford, Volvo',
                                         controller: _brandController,
                                         isRequired: true,
-                                        prefixIcon: Icons.branding_watermark_outlined,
+                                        prefixIcon:
+                                            Icons.branding_watermark_outlined,
                                         validator: (val) {
-                                          if (val == null || val.trim().isEmpty) {
+                                          if (val == null ||
+                                              val.trim().isEmpty) {
                                             return 'Brand is required';
                                           }
                                           return null;
@@ -312,9 +333,11 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                                         hint: 'e.g., Camry, F-150, Sprinter',
                                         controller: _modelController,
                                         isRequired: true,
-                                        prefixIcon: Icons.directions_car_outlined,
+                                        prefixIcon:
+                                            Icons.directions_car_outlined,
                                         validator: (val) {
-                                          if (val == null || val.trim().isEmpty) {
+                                          if (val == null ||
+                                              val.trim().isEmpty) {
                                             return 'Model is required';
                                           }
                                           return null;
@@ -327,7 +350,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                                         label: 'Status',
                                         value: _selectedStatus,
                                         isRequired: true,
-                                        items: VehicleStatus.values.map((status) {
+                                        items: VehicleStatus.values.map((
+                                          status,
+                                        ) {
                                           return DropdownMenuItem(
                                             value: status,
                                             child: Row(
@@ -346,7 +371,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                                             ),
                                           );
                                         }).toList(),
-                                        onChanged: (val) => setState(() => _selectedStatus = val),
+                                        onChanged: (val) => setState(
+                                          () => _selectedStatus = val,
+                                        ),
                                         validator: (val) {
                                           if (val == null) {
                                             return 'Please select a status';
@@ -396,9 +423,13 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                                   value: _selectedType,
                                   isRequired: true,
                                   items: Vehicle.commonTypes.map((type) {
-                                    return DropdownMenuItem(value: type, child: Text(type));
+                                    return DropdownMenuItem(
+                                      value: type,
+                                      child: Text(type),
+                                    );
                                   }).toList(),
-                                  onChanged: (val) => setState(() => _selectedType = val),
+                                  onChanged: (val) =>
+                                      setState(() => _selectedType = val),
                                 ),
                                 const SizedBox(height: 16),
                                 AppTextField(
@@ -439,7 +470,8 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                                       child: Text(status.label),
                                     );
                                   }).toList(),
-                                  onChanged: (val) => setState(() => _selectedStatus = val),
+                                  onChanged: (val) =>
+                                      setState(() => _selectedStatus = val),
                                 ),
                               ],
                             );
@@ -455,11 +487,14 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                           AppButton(
                             label: 'Cancel',
                             variant: AppButtonVariant.secondary,
-                            onPressed: () => router.navigateTo(AppScreen.vehicles),
+                            onPressed: () =>
+                                router.navigateTo(AppScreen.vehicles),
                           ),
                           const SizedBox(width: 14),
                           AppButton(
-                            label: _isEditMode ? 'Save Changes' : 'Save Vehicle',
+                            label: _isEditMode
+                                ? 'Save Changes'
+                                : 'Save Vehicle',
                             icon: Icons.check_circle_outline_rounded,
                             variant: AppButtonVariant.primary,
                             onPressed: _handleSave,

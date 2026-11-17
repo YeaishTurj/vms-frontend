@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -38,10 +39,7 @@ class DashboardScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Dashboard',
-                        style: AppTextStyles.h1,
-                      ),
+                      const Text('Dashboard', style: AppTextStyles.h1),
                       const SizedBox(height: 4),
                       Text(
                         'Overview of enterprise fleet status and operational readiness.',
@@ -53,7 +51,8 @@ class DashboardScreen extends StatelessWidget {
                     label: 'Register Vehicle',
                     icon: Icons.add_box_rounded,
                     variant: AppButtonVariant.primary,
-                    onPressed: () => router.navigateTo(AppScreen.registerVehicle),
+                    onPressed: () =>
+                        router.navigateTo(AppScreen.registerVehicle),
                   ),
                 ],
               ),
@@ -113,7 +112,9 @@ class DashboardScreen extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.cardBorderRadius,
+                  ),
                   border: Border.all(color: AppColors.border, width: 1),
                 ),
                 child: Column(
@@ -121,7 +122,10 @@ class DashboardScreen extends StatelessWidget {
                   children: [
                     // Card Header
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -130,12 +134,20 @@ class DashboardScreen extends StatelessWidget {
                             style: AppTextStyles.h3,
                           ),
                           TextButton.icon(
-                            icon: const Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.corporateBlue),
+                            icon: const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 16,
+                              color: AppColors.corporateBlue,
+                            ),
                             label: const Text(
                               'View All Vehicles',
-                              style: TextStyle(color: AppColors.corporateBlue, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                color: AppColors.corporateBlue,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                            onPressed: () => router.navigateTo(AppScreen.vehicles),
+                            onPressed: () =>
+                                router.navigateTo(AppScreen.vehicles),
                           ),
                         ],
                       ),
@@ -160,21 +172,43 @@ class DashboardScreen extends StatelessWidget {
                               DataCell(
                                 Text(
                                   vehicle.vehicleNumber,
-                                  style: AppTextStyles.tableCellBold.copyWith(color: AppColors.deepBlue),
+                                  style: AppTextStyles.tableCellBold.copyWith(
+                                    color: AppColors.deepBlue,
+                                  ),
                                 ),
                               ),
-                              DataCell(Text(vehicle.company, style: AppTextStyles.tableCell)),
-                              DataCell(Text(vehicle.type, style: AppTextStyles.tableCell)),
-                              DataCell(Text('${vehicle.brand} ${vehicle.model}', style: AppTextStyles.tableCell)),
+                              DataCell(
+                                Text(
+                                  vehicle.company,
+                                  style: AppTextStyles.tableCell,
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  vehicle.type,
+                                  style: AppTextStyles.tableCell,
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  '${vehicle.brand} ${vehicle.model}',
+                                  style: AppTextStyles.tableCell,
+                                ),
+                              ),
                               DataCell(StatusBadge(status: vehicle.status)),
                               DataCell(
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.corporateBlue),
+                                      icon: const Icon(
+                                        Icons.edit_outlined,
+                                        size: 18,
+                                        color: AppColors.corporateBlue,
+                                      ),
                                       tooltip: 'Edit Vehicle',
-                                      onPressed: () => router.navigateToEditVehicle(vehicle),
+                                      onPressed: () =>
+                                          router.navigateToEditVehicle(vehicle),
                                     ),
                                   ],
                                 ),

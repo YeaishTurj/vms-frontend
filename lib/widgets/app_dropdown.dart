@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
 
@@ -31,10 +32,7 @@ class AppDropdown<T> extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              label,
-              style: AppTextStyles.fieldLabel,
-            ),
+            Text(label, style: AppTextStyles.fieldLabel),
             if (isRequired) ...[
               const SizedBox(width: 4),
               const Text(
@@ -57,12 +55,21 @@ class AppDropdown<T> extends StatelessWidget {
           isExpanded: true,
           style: AppTextStyles.bodyMedium,
           hint: hint != null
-              ? Text(hint!, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textMuted))
+              ? Text(
+                  hint!,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textMuted,
+                  ),
+                )
               : null,
           decoration: const InputDecoration(
             contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           ),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textSecondary, size: 20),
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: AppColors.textSecondary,
+            size: 20,
+          ),
         ),
       ],
     );

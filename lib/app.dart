@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'routing/app_router.dart';
@@ -36,7 +37,8 @@ class MainShell extends StatelessWidget {
       listenable: router,
       builder: (context, _) {
         // When unauthenticated or on login screen, show isolated login card
-        if (!router.isAuthenticated || router.currentScreen == AppScreen.login) {
+        if (!router.isAuthenticated ||
+            router.currentScreen == AppScreen.login) {
           return const LoginScreen();
         }
 
@@ -51,9 +53,7 @@ class MainShell extends StatelessWidget {
                 child: Column(
                   children: [
                     const AppHeader(),
-                    Expanded(
-                      child: _buildCurrentScreen(router),
-                    ),
+                    Expanded(child: _buildCurrentScreen(router)),
                   ],
                 ),
               ),

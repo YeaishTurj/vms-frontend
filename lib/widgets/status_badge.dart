@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../core/theme/app_text_styles.dart';
 import '../models/vehicle.dart';
 
@@ -7,11 +8,7 @@ class StatusBadge extends StatelessWidget {
   final VehicleStatus status;
   final bool showDot;
 
-  const StatusBadge({
-    super.key,
-    required this.status,
-    this.showDot = true,
-  });
+  const StatusBadge({super.key, required this.status, this.showDot = true});
 
   @override
   Widget build(BuildContext context) {

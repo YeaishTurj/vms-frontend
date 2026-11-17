@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -54,7 +55,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
 
         // 1. Filter records
         final filteredList = mockData.vehicles.where((v) {
-          final matchesQuery = query.isEmpty ||
+          final matchesQuery =
+              query.isEmpty ||
               v.vehicleNumber.toLowerCase().contains(query) ||
               v.company.toLowerCase().contains(query) ||
               v.brand.toLowerCase().contains(query) ||
@@ -63,7 +65,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
           final matchesStatus =
               _statusFilter == null || v.status == _statusFilter;
           final matchesType =
-              _typeFilter == null || v.type.toLowerCase() == _typeFilter!.toLowerCase();
+              _typeFilter == null ||
+              v.type.toLowerCase() == _typeFilter!.toLowerCase();
 
           return matchesQuery && matchesStatus && matchesType;
         }).toList();
@@ -81,7 +84,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
             ? filteredList.sublist(startIndex, endIndex)
             : <Vehicle>[];
 
-        final hasActiveFilters = query.isNotEmpty || _statusFilter != null || _typeFilter != null;
+        final hasActiveFilters =
+            query.isNotEmpty || _statusFilter != null || _typeFilter != null;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(AppConstants.contentPadding),
@@ -108,7 +112,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     label: 'Register Vehicle',
                     icon: Icons.add_box_rounded,
                     variant: AppButtonVariant.primary,
-                    onPressed: () => router.navigateTo(AppScreen.registerVehicle),
+                    onPressed: () =>
+                        router.navigateTo(AppScreen.registerVehicle),
                   ),
                 ],
               ),
@@ -119,7 +124,9 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.cardBorderRadius,
+                  ),
                   border: Border.all(color: AppColors.border, width: 1),
                 ),
                 child: Wrap(
@@ -136,9 +143,16 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                         onChanged: (_) => setState(() => _currentPage = 1),
                         style: AppTextStyles.bodyMedium,
                         decoration: InputDecoration(
-                          hintText: 'Search by Number, Company, Brand, Model...',
-                          hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
-                          prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.textSecondary),
+                          hintText:
+                              'Search by Number, Company, Brand, Model...',
+                          hintStyle: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textMuted,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            size: 18,
+                            color: AppColors.textSecondary,
+                          ),
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
                                   icon: const Icon(Icons.clear, size: 16),
@@ -149,7 +163,10 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                                 )
                               : null,
                           isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
                       ),
                     ),
@@ -166,16 +183,25 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<VehicleStatus?>(
                           value: _statusFilter,
-                          hint: const Text('Status: All', style: AppTextStyles.bodyMedium),
+                          hint: const Text(
+                            'Status: All',
+                            style: AppTextStyles.bodyMedium,
+                          ),
                           items: [
                             const DropdownMenuItem(
                               value: null,
-                              child: Text('Status: All', style: AppTextStyles.bodyMedium),
+                              child: Text(
+                                'Status: All',
+                                style: AppTextStyles.bodyMedium,
+                              ),
                             ),
                             ...VehicleStatus.values.map(
                               (s) => DropdownMenuItem(
                                 value: s,
-                                child: Text('Status: ${s.label}', style: AppTextStyles.bodyMedium),
+                                child: Text(
+                                  'Status: ${s.label}',
+                                  style: AppTextStyles.bodyMedium,
+                                ),
                               ),
                             ),
                           ],
@@ -201,16 +227,25 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String?>(
                           value: _typeFilter,
-                          hint: const Text('Type: All', style: AppTextStyles.bodyMedium),
+                          hint: const Text(
+                            'Type: All',
+                            style: AppTextStyles.bodyMedium,
+                          ),
                           items: [
                             const DropdownMenuItem(
                               value: null,
-                              child: Text('Type: All', style: AppTextStyles.bodyMedium),
+                              child: Text(
+                                'Type: All',
+                                style: AppTextStyles.bodyMedium,
+                              ),
                             ),
                             ...Vehicle.commonTypes.map(
                               (t) => DropdownMenuItem(
                                 value: t,
-                                child: Text('Type: $t', style: AppTextStyles.bodyMedium),
+                                child: Text(
+                                  'Type: $t',
+                                  style: AppTextStyles.bodyMedium,
+                                ),
                               ),
                             ),
                           ],
@@ -227,10 +262,17 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     // Clear Filters Action
                     if (hasActiveFilters)
                       TextButton.icon(
-                        icon: const Icon(Icons.filter_alt_off_outlined, size: 16, color: AppColors.red),
+                        icon: const Icon(
+                          Icons.filter_alt_off_outlined,
+                          size: 16,
+                          color: AppColors.red,
+                        ),
                         label: const Text(
                           'Clear Filters',
-                          style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: AppColors.red,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         onPressed: _clearFilters,
                       ),
@@ -243,20 +285,27 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.cardBorderRadius,
+                  ),
                   border: Border.all(color: AppColors.border, width: 1),
                 ),
                 child: totalRecords == 0
                     ? EmptyState(
                         icon: Icons.search_off_rounded,
-                        title: hasActiveFilters ? 'No Matching Vehicles' : 'No Vehicles Found',
+                        title: hasActiveFilters
+                            ? 'No Matching Vehicles'
+                            : 'No Vehicles Found',
                         description: hasActiveFilters
                             ? 'No vehicle records matched your search query or filter options.'
                             : 'There are currently no vehicles registered in the system.',
-                        actionLabel: hasActiveFilters ? 'Reset Filters' : 'Register Vehicle',
+                        actionLabel: hasActiveFilters
+                            ? 'Reset Filters'
+                            : 'Register Vehicle',
                         onAction: hasActiveFilters
                             ? _clearFilters
-                            : () => router.navigateTo(AppScreen.registerVehicle),
+                            : () =>
+                                  router.navigateTo(AppScreen.registerVehicle),
                       )
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -279,16 +328,39 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                                     DataCell(
                                       Text(
                                         vehicle.vehicleNumber,
-                                        style: AppTextStyles.tableCellBold.copyWith(
-                                          color: AppColors.deepBlue,
-                                        ),
+                                        style: AppTextStyles.tableCellBold
+                                            .copyWith(
+                                              color: AppColors.deepBlue,
+                                            ),
                                       ),
                                     ),
-                                    DataCell(Text(vehicle.company, style: AppTextStyles.tableCell)),
-                                    DataCell(Text(vehicle.type, style: AppTextStyles.tableCell)),
-                                    DataCell(Text(vehicle.brand, style: AppTextStyles.tableCell)),
-                                    DataCell(Text(vehicle.model, style: AppTextStyles.tableCell)),
-                                    DataCell(StatusBadge(status: vehicle.status)),
+                                    DataCell(
+                                      Text(
+                                        vehicle.company,
+                                        style: AppTextStyles.tableCell,
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Text(
+                                        vehicle.type,
+                                        style: AppTextStyles.tableCell,
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Text(
+                                        vehicle.brand,
+                                        style: AppTextStyles.tableCell,
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Text(
+                                        vehicle.model,
+                                        style: AppTextStyles.tableCell,
+                                      ),
+                                    ),
+                                    DataCell(
+                                      StatusBadge(status: vehicle.status),
+                                    ),
                                     DataCell(
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -301,7 +373,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                                               color: AppColors.corporateBlue,
                                             ),
                                             tooltip: 'Edit Vehicle',
-                                            onPressed: () => router.navigateToEditVehicle(vehicle),
+                                            onPressed: () => router
+                                                .navigateToEditVehicle(vehicle),
                                           ),
                                           // Delete Action Button
                                           IconButton(
@@ -312,20 +385,28 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                                             ),
                                             tooltip: 'Delete Vehicle',
                                             onPressed: () async {
-                                              final confirmed = await ConfirmationDialog.show(
-                                                context,
-                                                vehicle: vehicle,
-                                              );
+                                              final confirmed =
+                                                  await ConfirmationDialog.show(
+                                                    context,
+                                                    vehicle: vehicle,
+                                                  );
                                               if (confirmed) {
-                                                mockData.deleteVehicle(vehicle.id);
+                                                mockData.deleteVehicle(
+                                                  vehicle.id,
+                                                );
                                                 if (context.mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
                                                     SnackBar(
                                                       content: Text(
                                                         'Vehicle ${vehicle.vehicleNumber} deleted successfully.',
                                                       ),
-                                                      backgroundColor: AppColors.charcoal,
-                                                      duration: const Duration(seconds: 3),
+                                                      backgroundColor:
+                                                          AppColors.charcoal,
+                                                      duration: const Duration(
+                                                        seconds: 3,
+                                                      ),
                                                     ),
                                                   );
                                                 }
@@ -344,7 +425,10 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
 
                           // Pagination Footer
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -357,14 +441,26 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                                     // Rows Per Page Dropdown
                                     Row(
                                       children: [
-                                        const Text('Rows: ', style: AppTextStyles.caption),
+                                        const Text(
+                                          'Rows: ',
+                                          style: AppTextStyles.caption,
+                                        ),
                                         DropdownButtonHideUnderline(
                                           child: DropdownButton<int>(
                                             value: _rowsPerPage,
                                             items: const [
-                                              DropdownMenuItem(value: 5, child: Text('5')),
-                                              DropdownMenuItem(value: 8, child: Text('8')),
-                                              DropdownMenuItem(value: 12, child: Text('12')),
+                                              DropdownMenuItem(
+                                                value: 5,
+                                                child: Text('5'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 8,
+                                                child: Text('8'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 12,
+                                                child: Text('12'),
+                                              ),
                                             ],
                                             onChanged: (val) {
                                               if (val != null) {
@@ -382,7 +478,9 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
 
                                     // Previous Page Button
                                     IconButton(
-                                      icon: const Icon(Icons.chevron_left_rounded),
+                                      icon: const Icon(
+                                        Icons.chevron_left_rounded,
+                                      ),
                                       tooltip: 'Previous Page',
                                       onPressed: _currentPage > 1
                                           ? () => setState(() => _currentPage--)
@@ -390,11 +488,15 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                                     ),
                                     Text(
                                       'Page $_currentPage of $totalPages',
-                                      style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600),
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                     // Next Page Button
                                     IconButton(
-                                      icon: const Icon(Icons.chevron_right_rounded),
+                                      icon: const Icon(
+                                        Icons.chevron_right_rounded,
+                                      ),
                                       tooltip: 'Next Page',
                                       onPressed: _currentPage < totalPages
                                           ? () => setState(() => _currentPage++)

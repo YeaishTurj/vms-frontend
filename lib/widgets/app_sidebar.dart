@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
@@ -20,7 +21,9 @@ class AppSidebar extends StatelessWidget {
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          width: collapsed ? AppConstants.sidebarCollapsedWidth : AppConstants.sidebarWidth,
+          width: collapsed
+              ? AppConstants.sidebarCollapsedWidth
+              : AppConstants.sidebarWidth,
           color: AppColors.sidebarBackground,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +91,8 @@ class AppSidebar extends StatelessWidget {
                       icon: Icons.directions_car_outlined,
                       activeIcon: Icons.directions_car_rounded,
                       label: 'Vehicles',
-                      isSelected: currentScreen == AppScreen.vehicles ||
+                      isSelected:
+                          currentScreen == AppScreen.vehicles ||
                           currentScreen == AppScreen.editVehicle,
                       isCollapsed: collapsed,
                       onTap: () => router.navigateTo(AppScreen.vehicles),
@@ -113,7 +117,9 @@ class AppSidebar extends StatelessWidget {
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Settings navigation item (Visual reference only).'),
+                            content: Text(
+                              'Settings navigation item (Visual reference only).',
+                            ),
                             duration: Duration(seconds: 2),
                           ),
                         );
@@ -187,12 +193,15 @@ class _SidebarItem extends StatelessWidget {
             vertical: 10,
           ),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.sidebarActiveItem : Colors.transparent,
+            color: isSelected
+                ? AppColors.sidebarActiveItem
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Row(
-            mainAxisAlignment:
-                isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
+            mainAxisAlignment: isCollapsed
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
             children: [
               Icon(
                 isSelected ? activeIcon : icon,
@@ -206,7 +215,9 @@ class _SidebarItem extends StatelessWidget {
                     label,
                     style: AppTextStyles.subtitle.copyWith(
                       color: isSelected ? activeTextColor : inactiveTextColor,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),

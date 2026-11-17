@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
 import '../models/vehicle.dart';
@@ -8,10 +9,7 @@ import 'app_button.dart';
 class ConfirmationDialog extends StatelessWidget {
   final Vehicle vehicle;
 
-  const ConfirmationDialog({
-    super.key,
-    required this.vehicle,
-  });
+  const ConfirmationDialog({super.key, required this.vehicle});
 
   static Future<bool> show(
     BuildContext context, {
@@ -55,10 +53,7 @@ class ConfirmationDialog extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
-                  child: Text(
-                    'Delete Vehicle',
-                    style: AppTextStyles.h2,
-                  ),
+                  child: Text('Delete Vehicle', style: AppTextStyles.h2),
                 ),
               ],
             ),
@@ -85,14 +80,20 @@ class ConfirmationDialog extends StatelessWidget {
                   Row(
                     children: [
                       const Text('Vehicle No: ', style: AppTextStyles.caption),
-                      Text(vehicle.vehicleNumber, style: AppTextStyles.tableCellBold),
+                      Text(
+                        vehicle.vehicleNumber,
+                        style: AppTextStyles.tableCellBold,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const Text('Vehicle: ', style: AppTextStyles.caption),
-                      Text('${vehicle.brand} ${vehicle.model} (${vehicle.type})', style: AppTextStyles.bodySmall),
+                      Text(
+                        '${vehicle.brand} ${vehicle.model} (${vehicle.type})',
+                        style: AppTextStyles.bodySmall,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),

@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../models/vehicle.dart';
 
 /// Available screen identifiers in the VMS single-page desktop navigation.
-enum AppScreen {
-  login,
-  dashboard,
-  vehicles,
-  registerVehicle,
-  editVehicle,
-}
+enum AppScreen { login, dashboard, vehicles, registerVehicle, editVehicle }
 
 /// Central stateful navigation controller for VMS.
 class AppRouter extends ChangeNotifier {
