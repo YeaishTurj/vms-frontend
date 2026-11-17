@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: vms-frontend:latest
+    pull_policy: build
     container_name: vms-frontend
     ports:
       - "8080:8080"
