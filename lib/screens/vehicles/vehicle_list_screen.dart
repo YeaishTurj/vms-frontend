@@ -206,7 +206,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.corporateBlue.withOpacity(0.12),
+                  color: AppColors.corporateBlue.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -254,7 +254,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.corporateBlue.withOpacity(0.12),
+                    color: AppColors.corporateBlue.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

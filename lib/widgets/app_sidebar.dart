@@ -230,12 +230,12 @@ class AppSidebar extends StatelessWidget {
                 color: AppColors.corporateBlue,
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
               ),
               child: const Icon(
                 Icons.directions_car_filled_rounded,
@@ -340,7 +340,7 @@ class _SidebarItem extends StatelessWidget {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.18),
+                      color: Colors.black.withValues(alpha: 0.18),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),

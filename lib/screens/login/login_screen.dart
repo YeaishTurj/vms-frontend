@@ -104,7 +104,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(8),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.corporateBlue.withOpacity(0.3),
+                              color: AppColors.corporateBlue.withValues(
+                                alpha: 0.3,
+                              ),
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
@@ -250,23 +252,26 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: AppColors.deepBlue,
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              'Sample Credentials (Mock Login)',
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.deepBlue,
-                                fontWeight: FontWeight.w600,
+                            Expanded(
+                              child: Text(
+                                'Sample Credentials (Mock Login)',
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.deepBlue,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Username: ${AppConstants.demoUsername}',
                               style: AppTextStyles.caption,
                             ),
+                            SizedBox(height: 2),
                             Text(
                               'Password: ${AppConstants.demoPassword}',
                               style: AppTextStyles.caption,

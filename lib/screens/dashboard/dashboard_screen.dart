@@ -83,12 +83,12 @@ class DashboardScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Column(
+        const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Dashboard', style: AppTextStyles.h1),
-            const SizedBox(height: 4),
-            const Text(
+            Text('Dashboard', style: AppTextStyles.h1),
+            SizedBox(height: 4),
+            Text(
               'Overview of enterprise fleet status and operational readiness.',
               style: AppTextStyles.subtitle,
             ),

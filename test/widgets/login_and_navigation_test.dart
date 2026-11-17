@@ -16,6 +16,11 @@ void main() {
     testWidgets('LoginScreen displays branding and credential fields', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(
         MaterialApp(theme: AppTheme.lightTheme, home: const LoginScreen()),
       );
@@ -30,6 +35,11 @@ void main() {
     testWidgets('Submitting empty fields triggers required-field validation', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(
         MaterialApp(theme: AppTheme.lightTheme, home: const LoginScreen()),
       );
@@ -54,6 +64,11 @@ void main() {
     testWidgets('Submitting valid credentials authenticates successfully', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(
         MaterialApp(theme: AppTheme.lightTheme, home: const LoginScreen()),
       );

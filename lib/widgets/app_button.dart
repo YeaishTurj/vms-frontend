@@ -94,12 +94,12 @@ class AppButton extends StatelessWidget {
             color: isButtonDisabled ? AppColors.border : bg,
             borderRadius: BorderRadius.circular(6),
             border: border != BorderSide.none
-                ? Border.fromBorderSide(border!)
+                ? Border.fromBorderSide(border)
                 : null,
             boxShadow: !isButtonDisabled && variant == AppButtonVariant.primary
                 ? [
                     BoxShadow(
-                      color: AppColors.corporateBlue.withOpacity(0.25),
+                      color: AppColors.corporateBlue.withValues(alpha: 0.25),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),

@@ -344,7 +344,10 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
       decoration: BoxDecoration(
         color: AppColors.redBg,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.red.withOpacity(0.3), width: 1),
+        border: Border.all(
+          color: AppColors.red.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

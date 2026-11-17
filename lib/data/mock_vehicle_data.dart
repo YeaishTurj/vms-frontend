@@ -114,6 +114,12 @@ class MockVehicleData extends ChangeNotifier {
   // CRUD Operations
   // ---------------------------------------------------------------------------
 
+  /// Resets repository back to initial seed data (useful for test isolation).
+  void resetToInitialSeed() {
+    _vehicles = List.from(_seedVehicles);
+    notifyListeners();
+  }
+
   Vehicle? findById(String id) {
     try {
       return _vehicles.firstWhere((v) => v.id == id);
@@ -121,6 +127,9 @@ class MockVehicleData extends ChangeNotifier {
       return null;
     }
   }
+
+  /// Alias for findById
+  Vehicle? getVehicleById(String id) => findById(id);
 
   void addVehicle(Vehicle vehicle) {
     _vehicles.insert(0, vehicle);
