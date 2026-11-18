@@ -250,9 +250,9 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
     if (repository.errorMessage != null && repository.vehicles.isEmpty) {
       return EmptyState(
         icon: Icons.cloud_off_rounded,
-        title: 'Backend Connection Error',
+        title: 'Backend Connection Notice',
         description:
-            '${repository.errorMessage}\n\nPlease check if the Spring Boot server is reachable on port 8081.',
+            '${repository.errorMessage}\n\nNote: Render free tier services sleep after inactivity and take ~45–60s on first load to wake up. Tap below to retry.',
         actionLabel: 'Retry Connection',
         onAction: () => repository.fetchVehicles(page: 0, size: _rowsPerPage),
       );

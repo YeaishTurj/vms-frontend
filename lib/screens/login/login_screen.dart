@@ -1,5 +1,9 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../../core/config/api_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -28,17 +32,37 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isWakingUp = false;
+  Timer? _coldStartTimer;
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    // Proactively pre-warm Render backend on page load to avoid cold start delay
+    _prewarmBackend();
+  }
+
+  void _prewarmBackend() {
+    try {
+      final healthUri = Uri.parse('${ApiConfig.baseUrl}/health');
+      http.get(healthUri).catchError((_) => http.Response('', 500));
+    } catch (_) {}
+  }
+
+  @override
   void dispose() {
+    _coldStartTimer?.cancel();
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _handleLogin() async {
-    setState(() => _errorMessage = null);
+    setState(() {
+      _errorMessage = null;
+      _isWakingUp = false;
+    });
     AuthService.instance.clearSessionMessage();
 
     if (!_formKey.currentState!.validate()) {
@@ -47,26 +71,42 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
+    // If request takes longer than 3.5 seconds, notify user that Render is waking up
+    _coldStartTimer?.cancel();
+    _coldStartTimer = Timer(const Duration(milliseconds: 3500), () {
+      if (mounted && _isLoading) {
+        setState(() => _isWakingUp = true);
+      }
+    });
+
     final username = _usernameController.text.trim();
     final password = _passwordController.text;
 
     try {
       await AuthService.instance.login(username, password);
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      AppRouter().navigateTo(AppScreen.dashboard);
-    } on ApiException catch (e) {
+      _coldStartTimer?.cancel();
       if (!mounted) return;
       setState(() {
         _isLoading = false;
+        _isWakingUp = false;
+      });
+      AppRouter().navigateTo(AppScreen.dashboard);
+    } on ApiException catch (e) {
+      _coldStartTimer?.cancel();
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _isWakingUp = false;
         _errorMessage = e.message;
       });
     } catch (e) {
+      _coldStartTimer?.cancel();
       if (!mounted) return;
       setState(() {
         _isLoading = false;
+        _isWakingUp = false;
         _errorMessage =
-            'Unable to connect to the authentication server. Please verify your connection.';
+            'Unable to connect to the authentication server. If Render was asleep, please wait a moment and try again.';
       });
     }
   }
@@ -270,6 +310,47 @@ class _LoginScreenState extends State<LoginScreen> {
                     fullWidth: true,
                     onPressed: _handleLogin,
                   ),
+
+                  // Cold Start Status Banner
+                  if (_isLoading && _isWakingUp) ...[
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: const Color(0xFF93C5FD),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.corporateBlue,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Connecting to Render backend... If the server was sleeping from inactivity, cold start takes ~45–60 seconds. Please hold on!',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.corporateBlue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 20),
 
                   // Documented Sample Credentials Card

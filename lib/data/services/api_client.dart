@@ -146,13 +146,15 @@ class ApiClient {
     if (error is TimeoutException) {
       return const ApiException(
         statusCode: 408,
-        message: 'Request timed out. Please verify backend connection and try again.',
+        message:
+            'Request timed out. The backend on Render may still be spinning up from idle sleep. Please wait a moment and try again.',
       );
     }
     if (error is http.ClientException) {
       return const ApiException(
         statusCode: 503,
-        message: 'Cannot reach VMS backend server. Please verify Spring Boot is running.',
+        message:
+            'Cannot reach VMS backend server. The instance may be waking up from sleep. Please try again in a few moments.',
       );
     }
     return ApiException(

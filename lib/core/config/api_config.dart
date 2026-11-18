@@ -16,7 +16,8 @@ class ApiConfig {
       : _rawBaseUrl;
 
   /// Default timeout for HTTP requests.
-  static const Duration timeout = Duration(seconds: 15);
+  /// Set to 90 seconds to tolerate Render free-tier cold start spin-up delays (~45-60s).
+  static const Duration timeout = Duration(seconds: 90);
 
   /// Whether the current configured API base URL enforces HTTPS.
   static bool get isHttps => baseUrl.toLowerCase().startsWith('https://');
