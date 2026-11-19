@@ -102,7 +102,9 @@ class AppHeader extends StatelessWidget {
                     ),
                   ),
                   onSubmitted: (query) {
-                    if (query.trim().isNotEmpty) {
+                    final trimmed = query.trim();
+                    if (trimmed.isNotEmpty) {
+                      router.setGlobalSearchQuery(trimmed);
                       router.navigateTo(AppScreen.vehicles);
                     }
                   },

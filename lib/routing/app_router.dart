@@ -25,12 +25,14 @@ class AppRouter extends ChangeNotifier {
   AppScreen _currentScreen = AppScreen.login;
   Vehicle? _selectedVehicleForEdit;
   bool _isSidebarCollapsed = false;
+  String? _globalSearchQuery;
 
   void _onAuthChanged() {
     if (!_authService.isAuthenticated) {
       if (_currentScreen != AppScreen.login) {
         _currentScreen = AppScreen.login;
         _selectedVehicleForEdit = null;
+        _globalSearchQuery = null;
         notifyListeners();
       }
     }
@@ -40,6 +42,18 @@ class AppRouter extends ChangeNotifier {
   Vehicle? get selectedVehicleForEdit => _selectedVehicleForEdit;
   bool get isSidebarCollapsed => _isSidebarCollapsed;
   bool get isAuthenticated => _authService.isAuthenticated;
+  String? get globalSearchQuery => _globalSearchQuery;
+
+  /// Sets a global search query to pass to the vehicle list screen.
+  void setGlobalSearchQuery(String? query) {
+    _globalSearchQuery = query;
+    notifyListeners();
+  }
+
+  /// Clears the global search query after consumption.
+  void clearGlobalSearchQuery() {
+    _globalSearchQuery = null;
+  }
 
   /// Navigates to a target screen with authentication guard.
   void navigateTo(AppScreen screen) {

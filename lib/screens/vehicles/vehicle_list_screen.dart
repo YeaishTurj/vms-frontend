@@ -32,13 +32,31 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
   @override
   void initState() {
     super.initState();
+    final router = AppRouter();
+    final initialQuery = router.globalSearchQuery;
+    if (initialQuery != null && initialQuery.isNotEmpty) {
+      _searchController.text = initialQuery;
+      router.clearGlobalSearchQuery();
+    }
+    router.addListener(_onRouterChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       VehicleRepository().fetchVehicles(page: 0, size: _rowsPerPage);
     });
   }
 
+  void _onRouterChanged() {
+    final query = AppRouter().globalSearchQuery;
+    if (query != null && query.isNotEmpty && query != _searchController.text) {
+      setState(() {
+        _searchController.text = query;
+      });
+      AppRouter().clearGlobalSearchQuery();
+    }
+  }
+
   @override
   void dispose() {
+    AppRouter().removeListener(_onRouterChanged);
     _searchController.dispose();
     super.dispose();
   }
@@ -156,7 +174,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
               v.vehicleNumber.toLowerCase().contains(query) ||
               v.company.toLowerCase().contains(query) ||
               v.brand.toLowerCase().contains(query) ||
-              v.model.toLowerCase().contains(query);
+              v.model.toLowerCase().contains(query) ||
+              v.type.toLowerCase().contains(query);
 
           final matchesStatus =
               _statusFilter == null || v.status == _statusFilter;
