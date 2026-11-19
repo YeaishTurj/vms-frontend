@@ -27,6 +27,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
   VehicleStatus? _statusFilter;
   String? _typeFilter;
 
+  int _currentPage = 0;
   int _rowsPerPage = 8;
 
   @override
@@ -40,7 +41,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
     }
     router.addListener(_onRouterChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      VehicleRepository().fetchVehicles(page: 0, size: _rowsPerPage);
+      VehicleRepository().fetchVehicles(page: 0, size: 100);
     });
   }
 
@@ -49,6 +50,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
     if (query != null && query.isNotEmpty && query != _searchController.text) {
       setState(() {
         _searchController.text = query;
+        _currentPage = 0;
       });
       AppRouter().clearGlobalSearchQuery();
     }
@@ -66,6 +68,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
       _searchController.clear();
       _statusFilter = null;
       _typeFilter = null;
+      _currentPage = 0;
     });
   }
 
@@ -79,17 +82,6 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
 
     try {
       await repository.deleteVehicle(vehicle.id);
-      if (repository.vehicles.isEmpty && repository.currentPage > 0) {
-        await repository.fetchVehicles(
-          page: repository.currentPage - 1,
-          size: _rowsPerPage,
-        );
-      } else {
-        await repository.fetchVehicles(
-          page: repository.currentPage,
-          size: _rowsPerPage,
-        );
-      }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -167,7 +159,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
       builder: (context, _) {
         final query = _searchController.text.trim().toLowerCase();
 
-        // Filter currently loaded page items based on query/filters
+        // 1. Filter all loaded fleet vehicles based on search query & dropdown filters
         final filteredList = repository.vehicles.where((v) {
           final matchesQuery =
               query.isEmpty ||
@@ -189,13 +181,31 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
         final hasActiveFilters =
             query.isNotEmpty || _statusFilter != null || _typeFilter != null;
 
+        // 2. Compute dynamic pagination on the filtered fleet list
+        final totalFiltered = filteredList.length;
+        final totalPages = (totalFiltered / _rowsPerPage).ceil();
+        final safeTotalPages = totalPages > 0 ? totalPages : 1;
+        final safeCurrentPage = _currentPage.clamp(0, safeTotalPages - 1);
+
+        final startIndex = safeCurrentPage * _rowsPerPage;
+        final endIndex = (startIndex + _rowsPerPage).clamp(0, totalFiltered);
+        final pagedList = startIndex < totalFiltered
+            ? filteredList.sublist(startIndex, endIndex)
+            : <Vehicle>[];
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(AppConstants.contentPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Screen Header: Title & Register Vehicle Button
-              _buildScreenHeader(router, repository.totalCount, isMobile),
+              // Screen Header: Title, Count Badge & Register Vehicle Button
+              _buildScreenHeader(
+                router: router,
+                totalCount: repository.totalCount,
+                totalFiltered: totalFiltered,
+                hasActiveFilters: hasActiveFilters,
+                isMobile: isMobile,
+              ),
               const SizedBox(height: 24),
 
               // Filter & Search Controls Toolbar
@@ -221,7 +231,12 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                 child: _buildCardContent(
                   context: context,
                   repository: repository,
-                  filteredList: filteredList,
+                  pagedList: pagedList,
+                  totalFiltered: totalFiltered,
+                  safeCurrentPage: safeCurrentPage,
+                  safeTotalPages: safeTotalPages,
+                  startIndex: startIndex,
+                  endIndex: endIndex,
                   hasActiveFilters: hasActiveFilters,
                   router: router,
                   isMobile: isMobile,
@@ -237,7 +252,12 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
   Widget _buildCardContent({
     required BuildContext context,
     required VehicleRepository repository,
-    required List<Vehicle> filteredList,
+    required List<Vehicle> pagedList,
+    required int totalFiltered,
+    required int safeCurrentPage,
+    required int safeTotalPages,
+    required int startIndex,
+    required int endIndex,
     required bool hasActiveFilters,
     required AppRouter router,
     required bool isMobile,
@@ -273,12 +293,12 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
         description:
             '${repository.errorMessage}\n\nNote: Render free tier services sleep after inactivity and take ~45–60s on first load to wake up. Tap below to retry.',
         actionLabel: 'Retry Connection',
-        onAction: () => repository.fetchVehicles(page: 0, size: _rowsPerPage),
+        onAction: () => repository.fetchVehicles(page: 0, size: 100),
       );
     }
 
-    // 3. Empty List States
-    if (filteredList.isEmpty) {
+    // 3. Empty List States (when no records match the filter)
+    if (totalFiltered == 0) {
       return _buildEmptyState(hasActiveFilters, router);
     }
 
@@ -313,8 +333,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                 ),
                 TextButton(
                   onPressed: () => repository.fetchVehicles(
-                    page: repository.currentPage,
-                    size: _rowsPerPage,
+                    page: 0,
+                    size: 100,
                   ),
                   child: const Text(
                     'Retry',
@@ -330,26 +350,50 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
           ),
 
         if (isMobile)
-          _buildMobileCardList(context, filteredList, repository, router)
+          _buildMobileCardList(context, pagedList, repository, router)
         else
-          _buildDesktopTable(context, filteredList, repository, router),
+          _buildDesktopTable(context, pagedList, repository, router),
 
         const Divider(color: AppColors.border, height: 1),
 
-        // Backend Pagination Footer
+        // Filtered & Paginated Footer
         _buildPaginationFooter(
-          repository: repository,
+          totalElements: totalFiltered,
+          currentPage: safeCurrentPage,
+          totalPages: safeTotalPages,
+          startIndex: startIndex,
+          endIndex: endIndex,
           isMobile: isMobile,
+          onPrevious: safeCurrentPage > 0
+              ? () => setState(() => _currentPage = safeCurrentPage - 1)
+              : null,
+          onNext: safeCurrentPage < safeTotalPages - 1
+              ? () => setState(() => _currentPage = safeCurrentPage + 1)
+              : null,
+          onRowsPerPageChanged: (val) {
+            if (val != null) {
+              setState(() {
+                _rowsPerPage = val;
+                _currentPage = 0;
+              });
+            }
+          },
         ),
       ],
     );
   }
 
-  Widget _buildScreenHeader(
-    AppRouter router,
-    int totalVehicles,
-    bool isMobile,
-  ) {
+  Widget _buildScreenHeader({
+    required AppRouter router,
+    required int totalCount,
+    required int totalFiltered,
+    required bool hasActiveFilters,
+    required bool isMobile,
+  }) {
+    final countLabel = hasActiveFilters
+        ? '$totalFiltered of $totalCount'
+        : '$totalCount Total';
+
     if (isMobile) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,7 +409,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '$totalVehicles Total',
+                  countLabel,
                   style: const TextStyle(
                     color: AppColors.deepBlue,
                     fontSize: 12,
@@ -413,7 +457,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '$totalVehicles Total',
+                    countLabel,
                     style: const TextStyle(
                       color: AppColors.deepBlue,
                       fontSize: 12,
@@ -466,7 +510,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
             height: 40,
             child: TextField(
               controller: _searchController,
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) => setState(() => _currentPage = 0),
               style: AppTextStyles.bodyMedium,
               decoration: InputDecoration(
                 hintText: 'Search by Number, Company, Brand...',
@@ -484,7 +528,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                         tooltip: 'Clear search',
                         onPressed: () {
                           _searchController.clear();
-                          setState(() {});
+                          setState(() => _currentPage = 0);
                         },
                       )
                     : null,
@@ -542,6 +586,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     onChanged: (val) {
                       setState(() {
                         _statusFilter = val;
+                        _currentPage = 0;
                       });
                     },
                   ),
@@ -593,6 +638,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     onChanged: (val) {
                       setState(() {
                         _typeFilter = val;
+                        _currentPage = 0;
                       });
                     },
                   ),
@@ -988,15 +1034,18 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
   }
 
   Widget _buildPaginationFooter({
-    required VehicleRepository repository,
+    required int totalElements,
+    required int currentPage,
+    required int totalPages,
+    required int startIndex,
+    required int endIndex,
     required bool isMobile,
+    required VoidCallback? onPrevious,
+    required VoidCallback? onNext,
+    required ValueChanged<int?> onRowsPerPageChanged,
   }) {
-    final startNumber = repository.totalElements == 0
-        ? 0
-        : (repository.currentPage * repository.pageSize) + 1;
-    final endNumber = ((repository.currentPage * repository.pageSize) +
-            repository.vehicles.length)
-        .clamp(0, repository.totalElements);
+    final startNumber = totalElements == 0 ? 0 : startIndex + 1;
+    final endNumber = endIndex;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -1004,7 +1053,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Showing $startNumber to $endNumber of ${repository.totalElements} vehicles',
+            'Showing $startNumber to $endNumber of $totalElements vehicles',
             style: AppTextStyles.bodySmall,
           ),
           Row(
@@ -1019,12 +1068,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                       DropdownMenuItem(value: 8, child: Text('8')),
                       DropdownMenuItem(value: 12, child: Text('12')),
                     ],
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() => _rowsPerPage = val);
-                        repository.fetchVehicles(page: 0, size: val);
-                      }
-                    },
+                    onChanged: onRowsPerPageChanged,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -1034,16 +1078,11 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
               IconButton(
                 icon: const Icon(Icons.chevron_left_rounded, size: 20),
                 tooltip: 'Previous Page',
-                onPressed: (!repository.isFirstPage && !repository.isLoading)
-                    ? () => repository.fetchVehicles(
-                          page: repository.currentPage - 1,
-                          size: _rowsPerPage,
-                        )
-                    : null,
+                onPressed: onPrevious,
               ),
 
               Text(
-                'Page ${repository.displayPageNumber} of ${repository.totalPages}',
+                'Page ${currentPage + 1} of $totalPages',
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -1053,12 +1092,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
               IconButton(
                 icon: const Icon(Icons.chevron_right_rounded, size: 20),
                 tooltip: 'Next Page',
-                onPressed: (!repository.isLastPage && !repository.isLoading)
-                    ? () => repository.fetchVehicles(
-                          page: repository.currentPage + 1,
-                          size: _rowsPerPage,
-                        )
-                    : null,
+                onPressed: onNext,
               ),
             ],
           ),

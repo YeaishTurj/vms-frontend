@@ -67,7 +67,7 @@ class VehicleRepository extends ChangeNotifier {
     notifyListeners();
 
     final targetPage = page ?? _currentPage;
-    final targetSize = size ?? _pageSize;
+    final targetSize = size ?? 100;
 
     try {
       final PaginatedVehicles paginated = await _apiService.getVehicles(
